@@ -1,6 +1,10 @@
-<title><b>Welcome to WiffleMaster</b></title>
+{% extends "layout.html" %}
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
 {% if session.user_id %}
 You are logged in. | <a href="/logout">Log out</a>
 {% else %}
 <a href="/login">Login</a> | <a href="/register">Register</a>
 {% endif %}
+{% endblock %}
