@@ -2,45 +2,52 @@
 {% block title %}Players{% endblock %}
 
 {% block content %}
+<h2>Players</h2>
 <table>
     <tr>
-        <td><b>Player</b></td>
+        <td><b>Name</b></td>
         <td><b>Bats</b></td>
         <td><b>Throws</b></td>
     </tr>
     {% for player in player_list %}
     <tr>
-        {% for stat in player %}
-        <td>{{ stat }}</td>
+        {% for i in range(player|length) %}
+            {% if i == 0 %}
+                {{ pass }}
+            {% elif i == 1 %}
+                <td><a href="/players/{{ player[0] }}">{{ player[1] }}</a></td>
+            {% else %}
+                <td>{{ player[i] }}</td>
+            {% endif %}
         {% endfor %}
     </tr>
     {% endfor %}
 </table>
 {% if session.user_id %}
-<h3>Add a new player</h3>
-<form id="players" action="/players" method="POST">
-    <label for="name">Name: </label>
-    <input type="text" name="name">
-    <label for="bats">Bats: </label>
-    <div class="wrapper-class">
-        <input type="radio" id="bats1" name="bats" value="L">
-        <label for="bats1">Left  </label>
-        <input type="radio" id="bats2" name="bats" value="R">
-        <label for="bats2">Right  </label>
-        <input type="radio" id="bats3" name="bats" value="S">
-        <label for="bats3">Switch</label>
-    </div>
-    <label for="throws">Throws: </label>
-    <div class="wrapper-class">
-        <input type="radio" id="throws1" name="throws" value="L">
-        <label for="throws1">Left  </label>
-        <input type="radio" id="throws2" name="throws" value="R">
-        <label for="throws2">Right</label>
-    </div>
-    <input id="button" type="submit" value="Add player">
-</form>
+    <h3>Add a new player</h3>
+    <form id="players" action="/players" method="POST">
+        <label for="name">Name: </label>
+        <input type="text" name="name">
+        <label for="bats">Bats: </label>
+        <div class="wrapper-class">
+            <input type="radio" id="bats1" name="bats" value="L">
+            <label for="bats1">Left  </label>
+            <input type="radio" id="bats2" name="bats" value="R">
+            <label for="bats2">Right  </label>
+            <input type="radio" id="bats3" name="bats" value="S">
+            <label for="bats3">Switch</label>
+        </div>
+        <label for="throws">Throws: </label>
+        <div class="wrapper-class">
+            <input type="radio" id="throws1" name="throws" value="L">
+            <label for="throws1">Left  </label>
+            <input type="radio" id="throws2" name="throws" value="R">
+            <label for="throws2">Right</label>
+        </div>
+        <input id="button" type="submit" value="Add player">
+    </form>
 {% if message %}
-{{ message }}
+    {{ message }}
 {% endif %}
 {% endif %}
 {% endblock %}

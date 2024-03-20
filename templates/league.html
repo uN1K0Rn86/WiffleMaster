@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}{{ league[1] }}{% endblock %}
+
+{% block content %}
+<h2>{{ league[1] }}</h2>
+<table>
+    {% for team in league_teams %}
+        <tr><td><a href="/teams/{{ team[0] }}">{{ team[1] }}</a></td>
+        </tr>
+    {% endfor %}
+</table>
+{% if session.user_id %}
+    <h3>Add team</h3>
+    <form id="players" action="/leagues/{{ league[0] }}" method="POST">
+        <label for="team">Choose a team: </label>
+        <select name="team">
+        {% for team in others %}
+            <option value="{{ team[0] }}">{{ team[1] }}</option>
+        {% endfor %}
+        </select>
+        <input id="button" type="submit" value="Add team">
+    </form>
+    <br>
+{% endif %}
+{% endblock %}

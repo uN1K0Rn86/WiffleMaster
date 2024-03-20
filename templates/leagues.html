@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}Leagues{% endblock %}
+
+{% block content %}
+<h2>Leagues</h2>
+<table>
+    {% for league in league_list %}
+        <tr><td><a href="/leagues/{{ league[0] }}">{{ league[1] }}</a></td></tr>
+    {% endfor %}
+</table>
+
+{% if session.user_id %}
+    <h3>Add a new league</h3>
+    <form id="players" action="/leagues" method="POST">
+        <label for="name">Name: </label>
+        <input type="text" name="name">
+        <input id="button" type="submit" value="Add league">
+    </form>
+{% endif %}
+{% endblock %}
