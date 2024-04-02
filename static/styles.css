@@ -77,6 +77,19 @@ a:hover {
     margin-left: 2em;
 }
 
+#order {
+    float: center;
+    padding: .5em;
+    background: blanchedalmond;
+    border-radius: .5em;
+    max-width: 60em;
+    display  : grid;
+    grid-template-columns: 15em 15em;
+    grid-row-gap: .3em;
+    margin-bottom: 2em;
+    margin-left: 2em;
+}
+
 #move {
     float: center;
     padding: .5em;

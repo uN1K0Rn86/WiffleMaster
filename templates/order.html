@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Set batting order{% endblock %}
+
+{% block content %}
+<form id="order" action="/games/order/{{ game_id }}" method="POST">
+    <fieldset>
+        <legend>Home team:</legend>
+        <p>Batting order: </p>
+        {% for i in range(h_players|length) %}
+            <p><label for="h_order">{{ i+1 }}: </label>
+            <select name="h_order">
+                <option value="None">None</option>
+                {% for player in h_players %}
+                    <option value="{{ player[0] }}">{{ player[1] }}</option>
+                {% endfor %}
+            </select></p>
+        {% endfor %}
+        <p><label for="h_pitcher">Starting pitcher: </label></p>
+        <select name="h_pitcher">
+            {% for player in h_players %}
+                <option value="{{ player[0] }}">{{ player[1] }}</option>
+            {% endfor %}
+        </select>
+    </fieldset>
+    <fieldset>
+        <legend>Away team:</legend>
+        <p>Batting order: </p>
+        {% for i in range(a_players|length) %}
+            <p><label for="a_order">{{ i+1 }}: </label>
+            <select name="a_order">
+                <option value="None">None</option>
+                {% for player in a_players %}
+                    <option value="{{ player[0] }}">{{ player[1] }}</option>
+                {% endfor %}
+            </select></p>
+        {% endfor %}
+        <p><label for="a_pitcher">Starting pitcher: </label></p>
+        <select name="a_pitcher">
+            {% for player in a_players %}
+                <option value="{{ player[0] }}">{{ player[1] }}</option>
+            {% endfor %}
+        </select>
+    </fieldset>
+    <input id="button" type="submit" value="Start game">
+</form>
+{% endblock %}
