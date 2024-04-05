@@ -93,7 +93,7 @@ $ python3
 '18fd24bf6a2ad4dac04a33963db1c42f'
 ```
 
-and copy it into your .env file.
+and copy it into your .env file (without the brackets).
 
 12. Initialize the application:
 
