@@ -2,4 +2,64 @@
 {% block title %}{% endblock %}
 
 {% block content %}
+<table class="score">
+    <tr>
+        <td></td>
+        {% for i in range(1, total_innings + 1) %}
+            <td><b>{{ i }}</b></td>
+        {% endfor %}
+        <td><b>R</b></td>
+        <td><b>H</b></td>
+    </tr>
+    <tr>
+        <td><b>{{ a_team[1] }}</b></td>
+        {% for i in range(0, inning + 1, 2) %}
+            <td>{{ runs_inning[i] }}</td>
+        {% endfor %}
+        {% for i in range((total_innings*2 - inning) // 2) %}
+        <td></td>
+        {% endfor %}
+        <td>{{ runs_away }}</td>
+    </tr>
+    <tr>
+        <td><b>{{ h_team[1] }}</b></td>
+        {% for i in range(1, inning + 1, 2) %}
+            <td>{{ runs_inning[i] }}</td>
+        {% endfor %}
+        {% for i in range((total_innings*2 - inning) // 2) %}
+        <td></td>
+        {% endfor %}
+        <td>{{ runs_home }}</td>
+    </tr>
+</table>
+<br>
+<fieldset class="game">
+    <div class="fieldset-item">
+        Pitcher: {{ pitcher[1] }}
+    </div>
+    <form action="/games/{{ id }}" method="POST">
+        <label for="new_pitcher">New Pitcher:</label>
+        <select id="new_pitcher" name="new_pitcher">
+            <option value="0">Change</option>
+            {% for player in p_players %}
+                <option value="{{ player.id }}">{{ player.name }}</option>
+            {% endfor %}
+        </select>
+        <input id="login-button" type="submit" value="Change">
+    </form>
+    <div class="fieldset-item">
+        Batter: {{ batter[1] }}
+    </div>
+    <div class="fieldset-item">
+        Today: {{ batter_stats[0] }} for {{ batter_stats[1] }}
+    </div>
+    <div class="fieldset-item">
+        On deck: {{ on_deck[1] }}
+    </div>
+    <div class="fieldset-item">
+        Today: {{ on_deck_stats[0] }} for {{ on_deck_stats[1] }}
+    </div>
+</fieldset>
+
+
 {% endblock %}

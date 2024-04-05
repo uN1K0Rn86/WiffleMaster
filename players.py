@@ -20,6 +20,11 @@ def display_player(id):
     sql = text("SELECT name, bats, throws FROM players WHERE id=:id")
     return db.session.execute(sql, {"id":id}).fetchone()
 
+def player_name(id):
+    """Return the player's id and name"""
+    sql = text("SELECT id, name FROM players WHERE id=:id")
+    return db.session.execute(sql, {"id":id}).fetchone()
+
 def list_teamless():
     sql = text("""SELECT id, name FROM players WHERE id NOT IN
                (SELECT player_id FROM team_players)

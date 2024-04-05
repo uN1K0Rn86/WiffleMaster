@@ -103,11 +103,56 @@ a:hover {
     margin-left: 2em;
 }
 
+table.score {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: blanchedalmond;
+    border: 1px solid black;
+    border-collapse: collapse;
+    empty-cells: show;
+}
+
+table.score td, table.score th {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border: 1px solid black;
+}
+
+fieldset.game {
+    background-color: blanchedalmond;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+}
+
+.fieldset-item {
+    grid-column: span 1;
+    margin-right: 10px;
+}
+
+.field-item-two-column{
+    grid-column: span 2;
+}
+
 form label, input{
     margin: auto 0;
 }
 
+#two_column_form{
+    grid-area: two-column-form;
+}
+
 form #button {
+    padding:5px;
+    border: none;
+    text-align: center;
+    width: 10em;
+    margin: auto 0 auto 5.5em;
+    background: tan;
+}
+
+#button {
     padding:5px;
     border: none;
     text-align: center;
