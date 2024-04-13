@@ -162,7 +162,8 @@ def go_games():
     if request.method == "GET":
         all_teams = teams.show_teams()
         all_leagues = leagues.show_leagues()
-        return render_template("games.html", all_teams=all_teams, all_leagues=all_leagues)
+        in_progress = games.games_in_progress()
+        return render_template("games.html", all_teams=all_teams, all_leagues=all_leagues, in_progress=in_progress)
     if request.method == "POST":
         a_team_id = request.form["a_team"]
         h_team_id = request.form["h_team"]
@@ -198,6 +199,7 @@ def game_page(id):
     runners = games.get_runners(id)
     outs = games.get_outs(id)
     in_progress = games.in_progress(id)
+    print(inning)
     
     if request.method == "GET":
         if inning % 2 == 1:

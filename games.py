@@ -20,6 +20,23 @@ def in_progress(game_id):
                """)
     return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
 
+def games_in_progress():
+    sql = text("""SELECT G.id AS id,
+                         G.a_team_runs AS a_runs,
+                         TA.name AS a_team,
+                         G.h_team_runs AS h_runs,
+                         TH.name AS h_team
+                    FROM
+                        games G
+                    JOIN
+                        teams TA ON G.a_team_id = TA.id
+                    JOIN
+                        teams TH ON G.h_team_id = TH.id
+                    WHERE
+                        G.in_progress = true;
+               """)
+    return db.session.execute(sql).fetchall()
+
 def set_order(game_id, h_order, a_order, h_pitcher, a_pitcher):
     try:
         sql = text("""UPDATE games
@@ -233,9 +250,9 @@ def add_out(game_id):
                        """)
         db.session.execute(sql, {"game_id":game_id})
         db.session.commit()
-        if inning == total - 1 and runs_home(game_id) > runs_away(game_id):
+        if get_outs(game_id) == 0 and inning == total and runs_home(game_id) > runs_away(game_id):
             finish_game(game_id)
-        if inning >= total and inning % 2 == 0 and runs_away(game_id) != runs_home(game_id):
+        if get_outs(game_id) == 3 and inning >= total and inning % 2 == 0 and runs_away(game_id) != runs_home(game_id):
             finish_game(game_id)
     except:
         return False
