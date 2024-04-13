@@ -22,11 +22,51 @@
 <br>
 <table class="score" style="margin-left: 0;">
     <tr>
-        <td><b>Players</b></td>
+        <td colspan="100%" style="text-align: center;"><h3>Players</h3></td>
+    </tr>
+    <tr>
+        <td><b>Name</b></td>
+        <td><b>PA</b></td>
+        <td><b>AB</b></td>
+        <td><b>H</b></td>
+        <td><b>BB</b></td>
+        <td><b>Avg</b></td>
+        <td><b>OBP</b></td>
+        <td><b>SLG</b></td>
+        <td><b>OPS</b></td>
+        <td><b>HR</b></td>
     </tr>
     {% for player in team_players %}
         <tr>
-            <td><a href="/players/{{ player[0] }}">{{ player[1] }}</a></td>
+            <td><a href="/players/{{ player.id }}">{{ player.name }}</a></td>
+            <td>{{ player.pa }}</td>
+            <td>{{ player.pa - player.walks }}</td>
+            <td>{{ player.hits }}</td>
+            <td>{{ player.walks }}</td>
+            {% if player.pa - player.walks == 0 %}
+                <td>.000</td>
+            {% else %}
+                <td>{{ '%.3f' % (player.hits / (player.pa - player.walks)) }}</td>
+            {% endif %}
+            {% if player.pa == 0 %}
+                <td>.000</td>
+            {% else %}
+                <td>{{ '%.3f' % ((player.hits + player.walks) / player.pa) }}</td>
+            {% endif %}
+            {% if player.pa - player.walks == 0 %}
+                <td>.000</td>
+            {% else %}
+                <td>{{ '%.3f' % ((player.singles + 2*player.doubles + 3*player.triples + 4*player.hr) / (player.pa - player.walks)) }}</td>
+            {% endif %}
+            {% if player.pa == 0 %}
+                <td>.000</td>
+            {% elif player.pa - player.walks == 0 and player.pa != 0 %}
+                <td>{{ '%.3f' % (player.walks / player.pa) }}</td>
+            {% else %}
+                <td>{{ '%.3f' % (((player.hits + player.walks) / player.pa) + 
+                    ((player.singles + 2*player.doubles + 3*player.triples + 4*player.hr) / (player.pa - player.walks))) }}</td>
+            {% endif %}
+            <td>{{ player.hr }}</td>
         </tr>
     {% endfor %}
 </table>

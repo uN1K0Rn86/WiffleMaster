@@ -103,7 +103,8 @@ def go_teams():
 def team_page(id):
     if request.method == "GET":
         team = teams.show_team(id)
-        team_players = teams.list_players(id)
+        team_players_ids = [player[0] for player in teams.list_players(id)]
+        team_players = [players.batting_stats(player) for player in team_players_ids]
         teamless = players.list_teamless()
         others = teams.list_players_other(id)
         record = teams.record(id)
