@@ -22,7 +22,10 @@ def display_player(id):
 
 def player_name(id):
     """Return the player's id and name"""
-    sql = text("SELECT id, name FROM players WHERE id=:id")
+    sql = text("""SELECT id, name
+               FROM players 
+               WHERE id=:id
+               """)
     return db.session.execute(sql, {"id":id}).fetchone()
 
 def list_teamless():
