@@ -106,7 +106,9 @@ def team_page(id):
         team_players = teams.list_players(id)
         teamless = players.list_teamless()
         others = teams.list_players_other(id)
-        return render_template("team.html", team=team, team_players=team_players, teamless=teamless, others=others)
+        record = teams.record(id)
+        return render_template("team.html", team=team, team_players=team_players, teamless=teamless, others=others,
+                               record=record)
     if request.method == "POST":
         team_id = id
         direct = f"/teams/{id}"

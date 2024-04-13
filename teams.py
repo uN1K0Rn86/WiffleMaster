@@ -57,3 +57,16 @@ def list_players_other(team_id):
                ORDER BY P.name
                """)
     return db.session.execute(sql, {"team_id":team_id}).fetchall()
+
+def record(team_id):
+    sql = text("""SELECT
+                        SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = :team_id)
+                            OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = :team_id) THEN 1 ELSE 0 END) AS wins,
+                        SUM(CASE WHEN (G.h_team_runs < G.a_team_runs AND G.h_team_id = :team_id)
+                            OR (G.a_team_runs < G.h_team_runs AND G.a_team_id = :team_id) THEN 1 ELSE 0 END) AS losses
+                    FROM
+                        games G
+                    JOIN
+                        teams T ON T.id = :team_id;
+               """)
+    return db.session.execute(sql, {"team_id":team_id}).fetchone()

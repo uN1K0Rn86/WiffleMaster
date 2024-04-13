@@ -3,9 +3,30 @@
 
 {% block content %}
 <h2>{{ team[1] }}</h2>
-<table>
+<table class="score">
+    <tr>
+        <td><b>Wins</b></td>
+        <td><b>Losses</b></td>
+        <td><b>Win rate</b></td>
+    </tr>
+    <tr>
+        <td>{{ record.wins }}</td>
+        <td>{{ record.losses }}</td>
+        {% if record.wins+record.losses == 0 %}
+            <td>.000</td>
+        {% else %}
+        <td>{{ '%.3f' % (record.wins / (record.wins + record.losses)) }}</td>
+        {% endif %}
+    </tr>
+</table>
+<br>
+<table class="score" style="margin-left: 0;">
+    <tr>
+        <td><b>Players</b></td>
+    </tr>
     {% for player in team_players %}
-        <tr><td><a href="/players/{{ player[0] }}">{{ player[1] }}</a></td>
+        <tr>
+            <td><a href="/players/{{ player[0] }}">{{ player[1] }}</a></td>
         </tr>
     {% endfor %}
 </table>
