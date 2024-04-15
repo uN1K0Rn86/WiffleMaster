@@ -8,6 +8,11 @@
         {% for i in range(1, total_innings + 1) %}
             <td><b>{{ i }}</b></td>
         {% endfor %}
+        {% if inning > total_innings*2 %}
+            {% for i in range(total_innings+1, (inning+3) // 2) %}
+                <td><b>{{ i }}</b></td>
+            {% endfor %}
+        {% endif %}
         <td><b>R</b></td>
         <td><b>H</b></td>
     </tr>
@@ -33,8 +38,11 @@
             {% endfor %}
         {% else %}
         {% for i in range((total_innings*2 + 1 - inning) // 2) %}
-        <td> </td>
+            <td> </td>
         {% endfor %}
+        {% endif %}
+        {% if inning > total_innings*2 and inning % 2 == 1 %}
+            <td> </td>
         {% endif %}
         <td>{{ runs_home }}</td>
         <td>{{ hits_home }}</td>

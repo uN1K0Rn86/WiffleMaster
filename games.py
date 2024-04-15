@@ -250,7 +250,7 @@ def add_out(game_id):
                        """)
         db.session.execute(sql, {"game_id":game_id})
         db.session.commit()
-        if get_outs(game_id) == 0 and inning == total and runs_home(game_id) > runs_away(game_id):
+        if get_outs(game_id) == 0 and inning >= total and runs_home(game_id) > runs_away(game_id):
             finish_game(game_id)
         if get_outs(game_id) == 3 and inning >= total and inning % 2 == 0 and runs_away(game_id) != runs_home(game_id):
             finish_game(game_id)

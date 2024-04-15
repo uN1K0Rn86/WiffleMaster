@@ -2,9 +2,22 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
+<fieldset class="text">
+<p>
+    Welcome to WiffleMaster. WiffleMaster is a webapp for managing teams, players, and leagues, and keeping score of wiffleball games. As a user,
+    you can create players, teams, and leagues. You can add players to teams and add teams to leagues. You can then keep score of games between these teams,
+    taking place as part of a league or independently. You can view players' and team's statistics and make managerial decisions accordingly.
+</p>
+<p>
+    Please see <a href="/rules"><u>rules and explanations</u></a> for more information on how wiffleball is played and what the different statistics mean.
+</p>
+</fieldset>
+<br>
 {% if session.user_id %}
 You are logged in. | <a href="/logout">Log out</a>
 {% else %}
+<fieldset class="text" style="text-align: center;">
 <a href="/login">Login</a> | <a href="/register">Register</a>
+</fieldset>
 {% endif %}
 {% endblock %}

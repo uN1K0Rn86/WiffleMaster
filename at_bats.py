@@ -178,6 +178,8 @@ def handle_pitch(result, ab_id, game_id, runners: list):
 
         db.session.execute(sql, {"result":result, "ab_id":ab_id})
         db.session.commit()
+        if games.current_inning(game_id) >= games.total_innings(game_id)*2 and games.runs_home(game_id) > games.runs_away(game_id):
+            games.finish_game(game_id)
     except:
         return False
     return True

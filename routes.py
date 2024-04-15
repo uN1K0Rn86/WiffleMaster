@@ -56,6 +56,11 @@ def logout():
     users.logout()
     return redirect("/")
 
+@app.route("/rules")
+def rules():
+    """Return the templates for rules.html."""
+    return render_template("rules.html")
+
 @app.route("/players", methods=["GET", "POST"])
 def go_players():
     """Return the template for players.html.
@@ -202,7 +207,6 @@ def game_page(id):
     runners = games.get_runners(id)
     outs = games.get_outs(id)
     in_progress = games.in_progress(id)
-    print(inning)
     
     if request.method == "GET":
         if inning % 2 == 1:

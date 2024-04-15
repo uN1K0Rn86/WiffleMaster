@@ -126,6 +126,10 @@ fieldset.game {
     grid-template-columns: 1fr 2fr;
 }
 
+fieldset.text {
+    background-color: blanchedalmond;
+}
+
 .fieldset-item {
     grid-column: span 1;
     margin-right: 10px;

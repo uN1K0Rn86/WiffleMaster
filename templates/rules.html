@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block title %}Rules and explanations{% endblock %}
+
+{% block content %}
+<fieldset class="text">
+<p>
+    Wiffleball is similar to baseball, but it is played with a plastic ball and plastic bats. Like in baseball, there are three bases. The bases are
+    positioned closer to each other than in baseball, and the outfield is smaller. A ball which is hit beyond to back line is a home run, and balls hit
+    to the left or right side of the field are foul balls.
+</p>
+<p>
+    Like in baseball, a hitter is out if the ball he hits is caught directly from the air. The ball can be caught in foul territory, but not in home run
+    territory. If the ball hits the ground (in fair territory) before being caught, it has to be thrown to first base before the hitter gets there. The
+    fielder can also throw the ball at the hitter. The hitter will be out if the ball hits him before he reaches the base.
+</p>
+<p>
+    A <b>plate appearance</b> (PA) is an instance of a pitcher throwing a set of pitches to a batter. If the pitch ends up in the strike zone or the batter
+    swings and misses at the pitch, it is considered a strike. Otherwise, it is a ball. For statistical purposes, a pitch that is batted into play is
+    considered a strike. The <b>count</b> is expressed in the form <b>balls</b> - <b>strikes</b>. If the count reaches four (4) balls, the batter gets a 
+    <b>walk</b>, allowing him to proceed to first base. If there is already a runner on first base, the runner moves to second. Similarly, a runner on second
+    base moves to third base (but only if there is also a runner on first). If the count reaches three (3) strikes, the batter is out. 
+</p>
+<p>
+    A wiffleball game consists of a number (usually 3) of innings. An inning consists of a top and bottom half. The away team always bats first (during the
+    top of the inning) and the home team bats second. The inning is over when there are 3 outs. The inning also ends if a team scores 5 or more runs, unless
+    said team is trailing by more than 5 runs. In that case, the inning continues until the game is tied or there are 3 outs.
+</p>
+<p>
+    The game ends once the predetermined number of innings is played, unless the game is tied at that point. In that case, extra innings are played until
+    the game has a winner.
+</p>
+</fieldset>
+<br>
+<table class="score">
+    <tr>
+        <td colspan="2" style="text-align: center;"><h3>Abbreviations</h3></td>
+    </tr>
+    <tr>
+        <td><b>Abbreviation</b></td>
+        <td><b>Explanation</b></td>
+    </tr>
+    <tr>
+        <td>PA</td>
+        <td>Plate appearance. Every set of pitches resulting in a walk, hit, or out is considered a plate appearance.</td>
+    </tr>
+    <tr>
+        <td>BB</td>
+        <td>Short for base on balls. This is the same as a walk, i.e. the pitcher throws 4 balls and the batter goes to first base</td>
+    </tr>
+    <tr>
+        <td>IBB</td>
+        <td>Intentional base on balls (intentional walk). The pitcher announces that he would rather walk the batter than pitch to him</td>
+    </tr>
+    <tr>
+        <td>AB</td>
+        <td>At bat. The total amount of plate appearances minus the amount of walks.</td>
+    </tr>
+    <tr>
+        <td>H</td>
+        <td>Hit. The batter hits the ball into play and reaches base safely.</td>
+    </tr>
+    <tr>
+        <td>Avg</td>
+        <td>Batting average. The amount of hits divided by the amount of at bats.</td>
+    </tr>
+    <tr>
+        <td>OBP</td>
+        <td>On base percentage. The amount of hits plus walks divided by the number of plate appearances</td>
+    </tr>
+    <tr>
+        <td>XBH</td>
+        <td>Extra base hit. The batter hits the ball into play and reaches at least second base.</td>
+    </tr>
+    <tr>
+        <td>HR</td>
+        <td>Home Run. The batter hits the ball and scores on the same play. Usually happens by hitting the ball beyond the back line.</td>
+    </tr>
+    <tr>
+        <td>TB</td>
+        <td>Total bases. A single gives one base, a double gives 2, a triple gives 3, and a home run gives 4.</td>
+    </tr>
+    <tr>
+        <td>SLG</td>
+        <td>Slugging percentage. The total number of bases divided by the number of at bats.</td>
+    </tr>
+    <tr>
+        <td>OPS</td>
+        <td>On base percentage plus slugging. This advanced statistic is meant to better represent the batte's performance, as it takes into account
+            both how often the batter reaches base, and the quality of his hits.
+        </td>
+    </tr>
+    <tr>
+        <td>IP</td>
+        <td>Innings pitched. The amount of innings pitched by a pitcher. Written in the form 'complete innings'.'additional outs'. Eg. 2.2 IP</td>
+    </tr>
+    <tr>
+        <td>ER</td>
+        <td>Earned runs. The amount of runs a pitcher has given up.</td>
+    </tr>
+    <tr>
+        <td>ERA</td>
+        <td>Earned run average. The average amount of earned runs the pitcher has given up per 9 innings pitched.</td>
+    </tr>
+</table>
+{% endblock %}
