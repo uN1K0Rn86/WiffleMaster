@@ -200,11 +200,17 @@ def batting_stats(game_id, player_id):
 
 def change_h_pitcher(game_id, player_id):
     try:
+        ab_id = at_bats.current_ab_id(game_id)
         sql = text("""UPDATE games
                 SET h_pitcher=:player_id
                 WHERE id=:game_id
                 """)
+        sql2 = text("""UPDATE at_bats
+                    SET pitcher_id=:player_id
+                    WHERE id=:ab_id
+                    """)
         db.session.execute(sql, {"game_id":game_id, "player_id":player_id})
+        db.session.execute(sql2, {"ab_id":ab_id, "player_id":player_id})
         db.session.commit()
     except:
         return False
@@ -212,11 +218,17 @@ def change_h_pitcher(game_id, player_id):
 
 def change_a_pitcher(game_id, player_id):
     try:
+        ab_id = at_bats.current_ab_id(game_id)
         sql = text("""UPDATE games
                 SET a_pitcher=:player_id
                 WHERE id=:game_id
                 """)
+        sql2 = text("""UPDATE at_bats
+                    SET pitcher_id=:player_id
+                    WHERE id=:ab_id
+                    """)
         db.session.execute(sql, {"game_id":game_id, "player_id":player_id})
+        db.session.execute(sql2, {"ab_id":ab_id, "player_id":player_id})
         db.session.commit()
     except:
         return False

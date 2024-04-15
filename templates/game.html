@@ -4,7 +4,17 @@
 {% block content %}
 <table class="score">
     <tr>
-        <td></td>
+        <td style="text-align: center;"><b>
+        {% if in_progress %}
+            {% if inning % 2 == 1 %}
+                Top {{ inning // 2 + 1}}
+            {% else %}
+                Bottom {{ inning // 2}}
+            {% endif %}
+        {% else %}
+            Final
+        {% endif %}</b>
+        </td>
         {% for i in range(1, total_innings + 1) %}
             <td><b>{{ i }}</b></td>
         {% endfor %}
@@ -83,7 +93,9 @@
                     {% endif %}
                     <option value="({{ runner[0] }}_4)">Scored</option>
                 </select>
+                <br>
             {% endfor %}
+            <br>
         {% endif %}
         <input id="login-button" type="submit" value="Submit">
     </form>
