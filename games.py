@@ -20,6 +20,26 @@ def in_progress(game_id):
                """)
     return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
 
+def latest(count):
+    sql = text("""SELECT G.id AS id,
+                         G.a_team_runs AS a_runs,
+                         TA.name AS a_team,
+                         G.h_team_runs AS h_runs,
+                         TH.name AS h_team,
+                         G.game_time AS time
+                    FROM
+                        games G
+                    JOIN
+                        teams TA ON G.a_team_id = TA.id
+                    JOIN
+                        teams TH ON G.h_team_id = TH.id
+                    ORDER BY
+                        G.game_time DESC
+                    LIMIT
+                        :count
+               """)
+    return db.session.execute(sql, {"count":count})
+
 def games_in_progress():
     sql = text("""SELECT G.id AS id,
                          G.a_team_runs AS a_runs,

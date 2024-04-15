@@ -2,6 +2,7 @@
 {% block title %}Games{% endblock %}
 
 {% block content %}
+{% if in_progress %}
 <table class="score">
     <tr><td colspan="2" style="text-align: center;"><b>Games in progress</b></td></tr>
     <tr>
@@ -16,8 +17,27 @@
     {% endfor %}
 </table>
 <br>
+{% endif %}
+<table class="score">
+    <tr><td colspan="3" style="text-align: center;"><b>Latest games</b></td></tr>
+    <tr>
+        <td><b>Away team @ home team</b></td>
+        <td><b>Score</b></td>
+        <td><b>Date</b></td>
+    </tr>
+    {% for game in latest %}
+    <tr>
+        <td><a href="/games/{{ game.id }}">{{ game.a_team }} @ {{ game.h_team }}</a></td>
+        <td style="text-align: center;">{{ game.a_runs }} - {{ game.h_runs }}</td>
+        <td>{{ game.time.strftime("%d.%m.%Y") }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<br>
 {% if session.user_id %}
 <form id="players" action="/games" method="POST">
+    <h3 style="text-align: center;">New game:</h3>
+    <br>
     <label for="a_team">Away team: </label>
     <select name="a_team">
         {% for team in all_teams %}

@@ -171,7 +171,9 @@ def go_games():
         all_teams = teams.show_teams()
         all_leagues = leagues.show_leagues()
         in_progress = games.games_in_progress()
-        return render_template("games.html", all_teams=all_teams, all_leagues=all_leagues, in_progress=in_progress)
+        latest = games.latest(5)
+        return render_template("games.html", all_teams=all_teams, all_leagues=all_leagues, in_progress=in_progress,
+                               latest=latest)
     if request.method == "POST":
         a_team_id = request.form["a_team"]
         h_team_id = request.form["h_team"]
