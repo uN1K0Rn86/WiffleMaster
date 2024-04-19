@@ -18,7 +18,7 @@
             <select name="h_order">
                 <option value="None">None</option>
                 {% for player in h_players %}
-                    <option value="{{ player[0] }}" {% if h_order[i] == player[0] %} selected {% endif %}>{{ player[1] }}</option>
+                    <option value="{{ player[0] }}" {% if h_order %}{% if h_order[i] == player[0] %} selected {% endif %}{% endif %}>{{ player[1] }}</option>
                 {% endfor %}
             </select></p>
         {% endfor %}
@@ -37,7 +37,7 @@
             <select name="a_order">
                 <option value="None">None</option>
                 {% for player in a_players %}
-                    <option value="{{ player[0] }}" {% if a_order[i] == player[0] %} selected {% endif %}>{{ player[1] }}</option>
+                    <option value="{{ player[0] }}" {% if a_order %}{% if a_order[i] == player[0] %} selected {% endif %}{% endif %}>{{ player[1] }}</option>
                 {% endfor %}
             </select></p>
         {% endfor %}

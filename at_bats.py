@@ -169,7 +169,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
                        """)
         elif result == "Fielder's choice":
             if len(runners) == 1 and runners[0][1] != 0:
-                runners[0][1] == 0
+                runners[0][1] = 0
                 outs += 1
             games.add_runner(ab_id, game_id, 1)
             games.update_runners(game_id, runners)
