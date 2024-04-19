@@ -25,11 +25,11 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         if not username or not password:
-            return render_template("error.html", message="Please do not leave any blank fields.")
+            return render_template("login.html", error_message="Please do not leave any blank fields.")
         if users.login(username, password):
             return redirect("/")
         else:
-            return render_template("error.html", message="Wrong username or password")
+            return render_template("login.html", error_message="Wrong username or password")
         
 @app.route("/register", methods=["GET", "POST"])
 def register():
