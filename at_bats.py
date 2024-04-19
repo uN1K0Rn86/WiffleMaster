@@ -5,7 +5,7 @@ import games
 def pitch_results():
     """Return a list of possible results for any pitch."""
     return ["Strike (looking)", "Strike (swinging)", "Foul", "Ball", "Intentional Walk", "Single", "Double", "Triple", "Home Run",
-            "Groundout", "Flyout", "Lineout"]
+            "Groundout", "Flyout", "Lineout", "Fielder's choice", "Sac fly", "Sac bunt"]
 
 def create_at_bat(game_id, batter_id, pitcher_id, p_team_id, b_team_id):
     """Create a new at bat."""
@@ -167,6 +167,22 @@ def handle_pitch(result, ab_id, game_id, runners: list):
                        SET result=:result, strikes = strikes + 1
                        WHERE id=:ab_id
                        """)
+        elif result == "Fielder's choice":
+            if len(runners) == 1 and runners[0][1] != 0:
+                runners[0][1] == 0
+                outs += 1
+            games.add_runner(ab_id, game_id, 1)
+            games.update_runners(game_id, runners)
+            sql = text("""UPDATE at_bats
+                       SET result=:result, strikes = strikes + 1
+                       """)
+        elif result == "Sac fly" or result == "Sac bunt":
+            games.update_runners(game_id, runners)
+            sql = text("""UPDATE at_bats
+                       SET result=:result, strikes = strikes + 1
+                       WHERE id=:ab_id
+                       """)
+            outs += 1
         else:
             games.update_runners(game_id, runners)
             sql = text("""UPDATE at_bats

@@ -46,25 +46,25 @@
             {% if player.pa - player.walks == 0 %}
                 <td>.000</td>
             {% else %}
-                <td>{{ '%.3f' % (player.hits / (player.pa - player.walks)) }}</td>
+                <td>{{ '%.3f' % (player.hits / (player.pa - player.walks - player.sacs)) }}</td>
             {% endif %}
             {% if player.pa == 0 %}
                 <td>.000</td>
             {% else %}
                 <td>{{ '%.3f' % ((player.hits + player.walks) / player.pa) }}</td>
             {% endif %}
-            {% if player.pa - player.walks == 0 %}
+            {% if player.pa - player.walks - player.sacs == 0 %}
                 <td>.000</td>
             {% else %}
-                <td>{{ '%.3f' % ((player.singles + 2*player.doubles + 3*player.triples + 4*player.hr) / (player.pa - player.walks)) }}</td>
+                <td>{{ '%.3f' % ((player.singles + 2*player.doubles + 3*player.triples + 4*player.hr) / (player.pa - player.walks - player.sacs)) }}</td>
             {% endif %}
             {% if player.pa == 0 %}
                 <td>.000</td>
-            {% elif player.pa - player.walks == 0 and player.pa != 0 %}
+            {% elif player.pa - player.walks - player.sacs == 0 and player.pa != 0 %}
                 <td>{{ '%.3f' % (player.walks / player.pa) }}</td>
             {% else %}
                 <td>{{ '%.3f' % (((player.hits + player.walks) / player.pa) + 
-                    ((player.singles + 2*player.doubles + 3*player.triples + 4*player.hr) / (player.pa - player.walks))) }}</td>
+                    ((player.singles + 2*player.doubles + 3*player.triples + 4*player.hr) / (player.pa - player.walks - player.sacs))) }}</td>
             {% endif %}
             <td>{{ player.hr }}</td>
         </tr>

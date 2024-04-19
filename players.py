@@ -48,7 +48,8 @@ def batting_stats(player_id):
                         COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END), 0) AS hr,
                         COALESCE(SUM(CASE WHEN A.result = 'Triple' THEN 1 ELSE 0 END), 0) AS triples,
                         COALESCE(SUM(CASE WHEN A.result = 'Double' THEN 1 ELSE 0 END), 0) AS doubles,
-                        COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) AS singles
+                        COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) AS singles,
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0) AS sacs
                     FROM at_bats A, players P
                     WHERE A.batter_id = P.id
                     AND P.id=:player_id

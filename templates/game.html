@@ -79,7 +79,8 @@
             {% endfor %}
         </select>
         {% if runners|length > 0 %}<br><br>
-            If the batter walks or hits a home run, runners will be moved automatically.<br><br>
+            If the batter walks or hits a home run, runners will be moved automatically.<br>
+            In case of a fielder's choice, make sure to mark which runner is out.<br><br>
             {% for runner in runners %}
                 <label for="runner{{ runner[1] }}"><b>Runner on {{ runner[1] }}: </b></label>
                 <select name="runner{{ runner[1] }}">
