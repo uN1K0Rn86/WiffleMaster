@@ -19,7 +19,11 @@
     </tr>
     {% for game in in_progress %}
     <tr>
-        <td><a href="/games/{{ game.id }}">{{ game.a_team }} @ {{ game.h_team }}</a></td>
+        <td>{% if not game.h_order or not game.a_order %}
+                <a href="games/order/{{ game.id }}">
+            {% else %}
+                <a href="/games/{{ game.id }}">
+            {% endif %}{{ game.a_team }} @ {{ game.h_team }}</a></td>
         <td style="text-align: center;">{{ game.a_runs }} - {{ game.h_runs }}</td>
     </tr>
     {% endfor %}

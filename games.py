@@ -49,7 +49,9 @@ def games_in_progress():
                          G.a_team_runs AS a_runs,
                          TA.name AS a_team,
                          G.h_team_runs AS h_runs,
-                         TH.name AS h_team
+                         TH.name AS h_team,
+                         G.h_order AS h_order,
+                         G.a_order AS a_order
                     FROM
                         games G
                     JOIN
@@ -58,10 +60,8 @@ def games_in_progress():
                         teams TH ON G.h_team_id = TH.id
                     WHERE
                         G.in_progress = true
-                    AND 
-                        G.h_order IS NOT NULL
-                    AND 
-                        G.a_order IS NOT NULL;
+                    ORDER BY
+                        G.game_time DESC
                """)
     return db.session.execute(sql).fetchall()
 
