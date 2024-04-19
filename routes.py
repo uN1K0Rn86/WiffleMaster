@@ -109,15 +109,16 @@ def go_teams():
     """Return the template for teams.html.
     Process user input and add team to database.
     """
+    team_list = teams.show_teams()
     if request.method == "GET":
-        team_list = teams.show_teams()
         return render_template("teams.html", team_list=team_list)
     if request.method == "POST":
         name = request.form["name"]
         if teams.add_team(name):
             return redirect("/teams")
         else:
-            return render_template("error.html", message="A team with that name already exists.")
+            return render_template("teams.html", error_message="A team with that name already exists.",
+                                   team_list=team_list)
         
 @app.route("/teams/<int:id>", methods=["GET", "POST"])
 def team_page(id):
