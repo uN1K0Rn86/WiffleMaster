@@ -326,31 +326,33 @@ def go_order(game_id):
         return render_template("order.html", h_players=h_players, a_players=a_players, game_id=game_id)
     
     if request.method == "POST":
-        # Retrieve the batting order for the home team and modify it so the player ids are integers.
-        h_order = request.form.getlist("h_order")
-        h_order = [player for player in h_order if player != "None"]
-        h_order = [int(player_id) for player_id in h_order]
+        h_players = teams.list_players(h_team[0]) # Players on the home team.
+        a_players = teams.list_players(a_team[0]) # Players on the away team.
 
-        # Make sure that a batter is not in the order twice.
-        if len(h_order) != len(set(h_order)):
-            return render_template("error.html", message="Please select only unique batters")
+        # Retrieve the batting order for the home team.
+        h_order = request.form.getlist("h_order")
         
         h_pitcher = request.form["h_pitcher"] # The starting pitcher for the home team.
+        a_pitcher = request.form["a_pitcher"] # The starting pitcher for the away team.
 
-        # Retrieve the batting order for the away team and modify it so the player ids are integers.
+        # Retrieve the batting order for the away team.
         a_order = request.form.getlist("a_order")
-        a_order = [player for player in a_order if player != "None"]
-        a_order = [int(player_id) for player_id in a_order]
+
+        # Remove "None" responses from the order forms for checking purposes and turn values into integers.
+        h_order = [int(player_id) for player_id in h_order if player_id != "None"]
+        a_order = [int(player_id) for player_id in a_order if player_id != "None"]
 
         # Make sure that a batter is not in the order twice.
-        if len(a_order) != len(set(a_order)):
-            return render_template("error.html", message="Please select only unique batters")
+        if len(a_order) != len(set(a_order)) or len(h_order) != len(set(h_order)):
+            return render_template("order.html", h_players=h_players, a_players=a_players, game_id=game_id,
+                                   error_message="Please select only unique batters", a_order=a_order,
+                                   h_order=h_order, h_pitcher=h_pitcher, a_pitcher=a_pitcher)
 
         # Make sure that there are at least two batters on each team.
         if len(a_order) < 2 or len(h_order) < 2:
-            return render_template("error.html", message="Please select at least 2 batters")
-        
-        a_pitcher = request.form["a_pitcher"] # The starting pitcher for the away team.
+            return render_template("order.html", h_players=h_players, a_players=a_players, game_id=game_id,
+                                   error_message="Please select at least 2 batters for both teams.", a_order=a_order,
+                                   h_order=h_order, h_pitcher=h_pitcher, a_pitcher=a_pitcher)
 
         if games.set_order(game_id, h_order, a_order, h_pitcher, a_pitcher):
             return redirect(url_for("game_page", id=game_id))

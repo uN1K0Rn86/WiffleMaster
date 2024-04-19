@@ -2,6 +2,13 @@
 {% block title %}Set batting order{% endblock %}
 
 {% block content %}
+{% if error_message %}
+    <fieldset class="text">
+        {{ error_message }}
+    </fieldset>
+    <br>
+    <br>
+{% endif %}
 <form id="order" action="/games/order/{{ game_id }}" method="POST">
     <fieldset>
         <legend>Home team:</legend>
@@ -11,14 +18,14 @@
             <select name="h_order">
                 <option value="None">None</option>
                 {% for player in h_players %}
-                    <option value="{{ player[0] }}">{{ player[1] }}</option>
+                    <option value="{{ player[0] }}" {% if h_order[i] == player[0] %} selected {% endif %}>{{ player[1] }}</option>
                 {% endfor %}
             </select></p>
         {% endfor %}
         <p><label for="h_pitcher">Starting pitcher: </label></p>
         <select name="h_pitcher">
             {% for player in h_players %}
-                <option value="{{ player[0] }}">{{ player[1] }}</option>
+                <option value="{{ player[0] }}" {% if h_pitcher == player[0] %} selected {% endif %}>{{ player[1] }}</option>
             {% endfor %}
         </select>
     </fieldset>
@@ -30,14 +37,14 @@
             <select name="a_order">
                 <option value="None">None</option>
                 {% for player in a_players %}
-                    <option value="{{ player[0] }}">{{ player[1] }}</option>
+                    <option value="{{ player[0] }}" {% if a_order[i] == player[0] %} selected {% endif %}>{{ player[1] }}</option>
                 {% endfor %}
             </select></p>
         {% endfor %}
         <p><label for="a_pitcher">Starting pitcher: </label></p>
         <select name="a_pitcher">
             {% for player in a_players %}
-                <option value="{{ player[0] }}">{{ player[1] }}</option>
+                <option value="{{ player[0] }}" {% if a_pitcher == player[0] %} selected {% endif %}>{{ player[1] }}</option>
             {% endfor %}
         </select>
     </fieldset>
