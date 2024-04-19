@@ -70,23 +70,34 @@ def go_players():
     """Return the template for players.html.
     Process user input and add player to database.
     """
+    player_list = players.display_players()
     if request.method == "GET":
-        player_list = players.display_players()
         return render_template("players.html", player_list=player_list)
     if request.method == "POST":
         name = request.form["name"]
-        try:
+        if "bats" in request.form:
             bats = request.form["bats"]
-        except:
-            return render_template("error.html", message="Please select a value for batting handedness.")
-        try:
+        else:
+            bats = None
+
+        if "throws" in request.form:
             throws = request.form["throws"]
-        except:
-            return render_template("error.html", message="Please select a value for throwing handedness.")
+        else:
+            throws = None
+    
+        if not name:
+            return render_template("players.html", player_list=player_list, bats=bats, throws=throws,
+                                    error_message="A player must have a name.")
+        if not bats or not throws:
+            return render_template("players.html", player_list=player_list,
+                                   error_message="Please select values for batting and throwing handedness.",
+                                   name=name, throws=throws, bats=bats)
+        
         if players.add_player(name, bats, throws):
             return redirect("/players")
         else:
-            return render_template("error.html", message="Could not add player. Did you provide all the information?")
+            return render_template("players.html", player_list=player_list,
+                                   error_message="Could not add player. Did you provide all the information?")
         
 @app.route("/players/<int:id>")
 def player_page(id):

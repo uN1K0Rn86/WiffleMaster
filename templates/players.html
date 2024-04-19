@@ -2,6 +2,13 @@
 {% block title %}Players{% endblock %}
 
 {% block content %}
+{% if error_message %}
+    <fieldset class="text">
+        {{ error_message }}
+    </fieldset>
+    <br>
+    <br>
+{% endif %}
 <h2>Players</h2>
 <table>
     <tr>
@@ -27,21 +34,21 @@
     <h3>Add a new player</h3>
     <form id="players" action="/players" method="POST">
         <label for="name">Name: </label>
-        <input type="text" name="name">
+        <input type="text" name="name" value="{{ name }}">
         <label for="bats">Bats: </label>
         <div class="wrapper-class">
-            <input type="radio" id="bats1" name="bats" value="L">
+            <input type="radio" id="bats1" name="bats" value="L" {% if bats == "L" %} checked {% endif %}>
             <label for="bats1">Left  </label>
-            <input type="radio" id="bats2" name="bats" value="R">
+            <input type="radio" id="bats2" name="bats" value="R" {% if bats == "R" %} checked {% endif %}>
             <label for="bats2">Right  </label>
-            <input type="radio" id="bats3" name="bats" value="S">
+            <input type="radio" id="bats3" name="bats" value="S" {% if bats == "S" %} checked {% endif %}>
             <label for="bats3">Switch</label>
         </div>
         <label for="throws">Throws: </label>
         <div class="wrapper-class">
-            <input type="radio" id="throws1" name="throws" value="L">
+            <input type="radio" id="throws1" name="throws" value="L" {% if throws == "L" %} checked {% endif %}>
             <label for="throws1">Left  </label>
-            <input type="radio" id="throws2" name="throws" value="R">
+            <input type="radio" id="throws2" name="throws" value="R" {% if throws == "R" %} checked {% endif %}>
             <label for="throws2">Right</label>
         </div>
         <input id="button" type="submit" value="Add player">
