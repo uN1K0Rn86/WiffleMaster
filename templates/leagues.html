@@ -2,6 +2,13 @@
 {% block title %}Leagues{% endblock %}
 
 {% block content %}
+{% if error_message %}
+    <fieldset class="text">
+        {{ error_message }}
+    </fieldset>
+    <br>
+    <br>
+{% endif %}
 <h2>Leagues</h2>
 <table>
     {% for league in league_list %}

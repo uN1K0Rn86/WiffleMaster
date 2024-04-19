@@ -149,17 +149,19 @@ def go_leagues():
     """Return the template for leagues.html.
     Process user input and add a league to database
     """
+    league_list = leagues.show_leagues()
     if request.method == "GET":
-        league_list = leagues.show_leagues()
         return render_template("leagues.html", league_list=league_list)
     if request.method == "POST":
         name = request.form["name"]
         if not name:
-            return render_template("error.html", message="Please give a name for the league.")
+            return render_template("leagues.html", league_list=league_list,
+                                   error_message="Please give a name for the league.")
         if leagues.add_league(name):
             return redirect("/leagues")
         else:
-            return render_template("error.html", message="A league with that name already exists. Please select a different name.")
+            return render_template("leagues.html", league_list=league_list,
+                                   error_message="A league with that name already exists. Please select a different name.")
         
 @app.route("/leagues/<int:id>", methods=["GET", "POST"])
 def league_page(id):
@@ -178,20 +180,27 @@ def league_page(id):
 @app.route("/games", methods=["GET", "POST"])
 def go_games():
     """Return the template for creating games."""
+    all_teams = teams.show_teams()
+    all_leagues = leagues.show_leagues()
+    in_progress = games.games_in_progress()
+    latest = games.latest(5)
+
     if request.method == "GET":
-        all_teams = teams.show_teams()
-        all_leagues = leagues.show_leagues()
-        in_progress = games.games_in_progress()
-        latest = games.latest(5)
         return render_template("games.html", all_teams=all_teams, all_leagues=all_leagues, in_progress=in_progress,
                                latest=latest)
+    
     if request.method == "POST":
-        a_team_id = request.form["a_team"]
-        h_team_id = request.form["h_team"]
-        league_id = request.form["league"]
-        innings = request.form["innings"]
+        a_team_id = int(request.form["a_team"])
+        h_team_id = int(request.form["h_team"])
+        league_id = int(request.form["league"])
+        innings = int(request.form["innings"])
+
         if a_team_id == h_team_id:
-            return render_template("error.html", message="Please choose two different teams")
+            return render_template("games.html", error_message="Please choose two different teams.",
+                                   all_teams=all_teams, all_leagues=all_leagues, in_progress=in_progress,
+                                   latest=latest, a_team_id=a_team_id, h_team_id=h_team_id, league_id=league_id,
+                                   innings=innings)
+        
         game_id = games.new_game(innings, a_team_id, h_team_id, league_id)
         return redirect(url_for("go_order", game_id=game_id))
 

@@ -2,6 +2,14 @@
 {% block title %}Games{% endblock %}
 
 {% block content %}
+{% if error_message %}
+    <fieldset class="text">
+        {{ error_message }}
+    </fieldset>
+    <br>
+    <br>
+{% endif %}
+
 {% if in_progress %}
 <table class="score">
     <tr><td colspan="2" style="text-align: center;"><b>Games in progress</b></td></tr>
@@ -41,26 +49,26 @@
     <label for="a_team">Away team: </label>
     <select name="a_team">
         {% for team in all_teams %}
-            <option value="{{ team.id }}">{{ team.name }}</option>
+            <option value="{{ team.id }}" {% if a_team_id == team.id %} selected {% endif %}>{{ team.name }}</option>
         {% endfor %}
     </select>
     <label for="h_team">Home team: </label>
     <select name="h_team">
         {% for team in all_teams %}
-            <option value="{{ team.id }}">{{ team.name }}</option>
+            <option value="{{ team.id }}" {% if h_team_id == team.id %} selected {% endif %}>{{ team.name }}</option>
         {% endfor %}
     </select>
     <label for="innings">Innings: </label>
     <select name="innings">
         {% for i in range(1, 10) %}
-            <option value="{{ i }}">{{ i }}</option>
+            <option value="{{ i }}" {% if innings == i %} selected {% endif %}>{{ i }}</option>
         {% endfor %}
     </select>
     <label for="league">League: </label>
     <select name="league">
         <option value="0">None</option>
         {% for league in all_leagues %}
-            <option value="{{ league.id }}">{{ league.name }}</option>
+            <option value="{{ league.id }}" {% if league_id == league.id %} selected {% endif %}>{{ league.name }}</option>
         {% endfor %}
     </select>
     <input id="button" type="submit" value="New game">
