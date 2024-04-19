@@ -24,6 +24,8 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
+        if not username or not password:
+            return render_template("error.html", message="Please do not leave any blank fields.")
         if users.login(username, password):
             return redirect("/")
         else:
@@ -41,6 +43,8 @@ def register():
         username = request.form["username"]
         password1 = request.form["password1"]
         password2 = request.form["password2"]
+        if not username or not password1 or not password2:
+            return render_template("error.html", message="Please do not leave any blank fields.")
         if password1 != password2:
             return render_template("error.html", message="Passwords do not match")
         if users.register(username, password1):
@@ -138,6 +142,8 @@ def go_leagues():
         return render_template("leagues.html", league_list=league_list)
     if request.method == "POST":
         name = request.form["name"]
+        if not name:
+            return render_template("error.html", message="Please give a name for the league.")
         if leagues.add_league(name):
             return redirect("/leagues")
         else:
