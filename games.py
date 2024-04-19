@@ -57,7 +57,11 @@ def games_in_progress():
                     JOIN
                         teams TH ON G.h_team_id = TH.id
                     WHERE
-                        G.in_progress = true;
+                        G.in_progress = true
+                    AND 
+                        G.h_order IS NOT NULL
+                    AND 
+                        G.a_order IS NOT NULL;
                """)
     return db.session.execute(sql).fetchall()
 

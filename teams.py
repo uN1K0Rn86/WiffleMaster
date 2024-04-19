@@ -72,6 +72,8 @@ def record(team_id):
                     FROM
                         games G
                     JOIN
-                        teams T ON T.id = :team_id;
+                        teams T ON T.id = :team_id
+                    WHERE
+                        G.in_progress = false;
                """)
     return db.session.execute(sql, {"team_id":team_id}).fetchone()
