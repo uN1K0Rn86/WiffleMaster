@@ -3,10 +3,12 @@ from db import db
 import games
 
 def pitch_results():
+    """Return a list of possible results for any pitch."""
     return ["Strike (looking)", "Strike (swinging)", "Foul", "Ball", "Intentional Walk", "Single", "Double", "Triple", "Home Run",
             "Groundout", "Flyout", "Lineout"]
 
 def create_at_bat(game_id, batter_id, pitcher_id, p_team_id, b_team_id):
+    """Create a new at bat."""
     outs = games.get_outs(game_id)
     inning = games.current_inning(game_id)
     try:
@@ -21,6 +23,7 @@ def create_at_bat(game_id, batter_id, pitcher_id, p_team_id, b_team_id):
     return True
 
 def current_ab_id(game_id):
+    """Return the id of the current at bat, or None if there is no current at bat."""
     sql = text("""SELECT id
                FROM at_bats
                WHERE game_id=:game_id
@@ -38,6 +41,7 @@ def current_ab_id(game_id):
         return None
 
 def current_batter(ab_id):
+    """Return the id of the current batter based on the at bat id."""
     sql = text("""SELECT batter_id
                FROM at_bats
                WHERE id=:ab_id
@@ -45,6 +49,9 @@ def current_batter(ab_id):
     return db.session.execute(sql, {"ab_id":ab_id}).fetchone()[0]
 
 def handle_pitch(result, ab_id, game_id, runners: list):
+    """Update the current at bat in the at_bats table based on the pitch result.
+       Call functions to add runners, outs, or runs as needed. Call the function
+       to finish the game if the home team obtains a lead in the final inning."""
     outs = 0
     runs = 0
     for runner in runners:
@@ -185,6 +192,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
     return True
 
 def strikes(ab_id):
+    """Return the amount of strikes in the given at bat."""
     sql = text("""SELECT strikes
                FROM at_bats
                WHERE id=:ab_id
@@ -192,6 +200,7 @@ def strikes(ab_id):
     return db.session.execute(sql, {"ab_id":ab_id}).fetchone()[0]
 
 def balls(ab_id):
+    """Return the amount of balls in the given at bat."""
     sql = text("""SELECT balls
                FROM at_bats
                WHERE id=:ab_id
@@ -199,6 +208,7 @@ def balls(ab_id):
     return db.session.execute(sql, {"ab_id":ab_id}).fetchone()[0]
 
 def rbi(ab_id, rbi):
+    """Add an rbi (run brought in) to an at bat."""
     try:
         sql = text("""UPDATE at_bats
                    SET rbi=:rbi

@@ -17,6 +17,7 @@ def display_players():
     return db.session.execute(sql).fetchall()
 
 def display_player(id):
+    """Return the player's name and attributes."""
     sql = text("SELECT name, bats, throws FROM players WHERE id=:id")
     return db.session.execute(sql, {"id":id}).fetchone()
 
@@ -29,12 +30,14 @@ def player_name(id):
     return db.session.execute(sql, {"id":id}).fetchone()
 
 def list_teamless():
+    """Return a list of player ids and names for players who are not on any team"""
     sql = text("""SELECT id, name FROM players WHERE id NOT IN
                (SELECT player_id FROM team_players)
                ORDER BY name""")
     return db.session.execute(sql).fetchall()
 
 def batting_stats(player_id):
+    """Return batting statistics for a player."""
     sql = text("""SELECT
                         P.id AS id,
                         P.name AS name,
@@ -48,6 +51,19 @@ def batting_stats(player_id):
                         COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) AS singles
                     FROM at_bats A, players P
                     WHERE A.batter_id = P.id
+                    AND P.id=:player_id
+                    GROUP BY P.id
+               """)
+    return db.session.execute(sql, {"player_id":player_id}).fetchone()
+
+def pitching_stats(player_id):
+    """Return pitching statistics for a player."""
+    sql = text("""SELECT
+                        P.id AS id,
+                        P.name AS name,
+                        COALESCE(SUM(CASE WHEN A.result LIKE '%out%' THEN 1 ELSE 0 END), 0) AS outs
+                    FROM at_bats A, players P
+                    WHERE A.pitcher_id = P.id
                     AND P.id=:player_id
                     GROUP BY P.id
                """)

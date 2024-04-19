@@ -14,7 +14,7 @@ CREATE TABLE team_players (player_id INTEGER REFERENCES players,
                            team_id INTEGER REFERENCES teams);
 
 CREATE TABLE leagues (id SERIAL PRIMARY KEY,
-                      name TEXT);
+                      name TEXT UNIQUE);
 
 CREATE TABLE league_teams (team_id INTEGER REFERENCES teams,
                            league_id INTEGER REFERENCES leagues);

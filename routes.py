@@ -102,7 +102,7 @@ def go_teams():
         if teams.add_team(name):
             return redirect("/teams")
         else:
-            return render_template("error.html", message="Could not create team")
+            return render_template("error.html", message="A team with that name already exists.")
         
 @app.route("/teams/<int:id>", methods=["GET", "POST"])
 def team_page(id):
@@ -115,6 +115,7 @@ def team_page(id):
         record = teams.record(id)
         return render_template("team.html", team=team, team_players=team_players, teamless=teamless, others=others,
                                record=record)
+    
     if request.method == "POST":
         team_id = id
         direct = f"/teams/{id}"
@@ -122,16 +123,10 @@ def team_page(id):
             player_id = request.form["players"]
             if teams.add_player(player_id, team_id):
                 return redirect(direct)
-            else:
-                return render_template("error.html", message="Could not add player")
         elif "move" in request.form:
             move_p_id = request.form["move"]
             if teams.move_player(move_p_id, team_id):
                 return redirect(direct)
-            else:
-                return render_template("error.html", message="Could not move player")
-        else:
-                return render_template("error.html", message="Could not add player")
         
 @app.route("/leagues", methods=["GET", "POST"])
 def go_leagues():
@@ -146,7 +141,7 @@ def go_leagues():
         if leagues.add_league(name):
             return redirect("/leagues")
         else:
-            return render_template("error.html", message="Could not create league")
+            return render_template("error.html", message="A league with that name already exists. Please select a different name.")
         
 @app.route("/leagues/<int:id>", methods=["GET", "POST"])
 def league_page(id):
@@ -161,8 +156,6 @@ def league_page(id):
         direct = f"/leagues/{id}"
         if leagues.add_team(team, id):
             return redirect(direct)
-        else:
-            return render_template("error.html", message="Could not add team to league")
         
 @app.route("/games", methods=["GET", "POST"])
 def go_games():
@@ -182,36 +175,40 @@ def go_games():
         if a_team_id == h_team_id:
             return render_template("error.html", message="Please choose two different teams")
         game_id = games.new_game(innings, a_team_id, h_team_id, league_id)
-        if not game_id:
-            return render_template("error.html", message="Game creation failed.")
-        else:
-            return redirect(url_for("go_order", game_id=game_id))
+        return redirect(url_for("go_order", game_id=game_id))
 
 @app.route("/games/<int:id>", methods=["GET", "POST"])
 def game_page(id):
-    """Return the page for the game in question."""
+    """Return the page for the game in question and handle game events."""
     h_team = games.home_team(id)
     a_team = games.away_team(id)
+
     h_order = games.get_h_order(id)
     h_order = [players.player_name(player) for player in h_order]
     h_pitcher = players.player_name(games.get_h_pitcher(id))
+
     a_order = games.get_a_order(id)
     a_order = [players.player_name(player) for player in a_order]
     a_pitcher = players.player_name(games.get_a_pitcher(id))
+
     inning = games.current_inning(id)
     total_innings = games.total_innings(id)
     runs_inning = [games.runs_inning(id, i) for i in range(1, inning + 1)]
+
     runs_home = games.runs_home(id)
     runs_away = games.runs_away(id)
     hits_home = games.hits_home(id)
     hits_away = games.hits_away(id)
+
     pitch_results = at_bats.pitch_results()
     runners = games.get_runners(id)
     outs = games.get_outs(id)
     in_progress = games.in_progress(id)
     
     if request.method == "GET":
+        # This if block is for the top of the inning; the away team is batting and the home team is pitching.
         if inning % 2 == 1:
+            # This makes sure the correct batter is retrieved.
             if in_progress:
                 if at_bats.current_ab_id(id) is None:
                     last = games.get_a_previous(id)
@@ -219,13 +216,16 @@ def game_page(id):
                         games.set_a_previous(id, -1)
                     else:
                         games.set_a_previous(id, last+1)
+
             previous = games.get_a_previous(id)
-            batter = games.batter_up(a_order, previous)
+            batter = games.batter_up(a_order, previous) # The current batter.
             batter_stats = games.batting_stats(id, batter[0])
-            on_deck = games.batter_up(a_order, previous+1)
+            on_deck = games.batter_up(a_order, previous+1) # The next batter.
             on_deck_stats = games.batting_stats(id, on_deck[0])
-            pitcher = h_pitcher
-            p_players = teams.list_players(h_team[0])
+            pitcher = h_pitcher # The current pitcher.
+            p_players = teams.list_players(h_team[0]) # List of players available for a pitcher change.
+
+            # This creates an at bat.
             if in_progress:
                 if at_bats.current_ab_id(id) is None:
                     at_bats.create_at_bat(id, batter[0], pitcher[0], h_team[0], a_team[0])
@@ -235,8 +235,10 @@ def game_page(id):
             else:
                 count = (0, 0)
             pitch_count = games.pitch_count(id, h_pitcher[0])
-            
+
+        # This block is for the bottom of the inning i.e. the home team is batting and the away team is pitching.  
         else:
+            # This makes sure the correct batter is retrieved.
             if in_progress:
                 if at_bats.current_ab_id(id) is None:
                     last = games.get_h_previous(id)
@@ -244,13 +246,16 @@ def game_page(id):
                         games.set_h_previous(id, -1)
                     else:
                         games.set_h_previous(id, last+1)
+
             previous = games.get_h_previous(id)
-            batter = games.batter_up(h_order, previous)
+            batter = games.batter_up(h_order, previous) # The current batter.
             batter_stats = games.batting_stats(id, batter[0])
-            on_deck = games.batter_up(h_order, previous+1)
+            on_deck = games.batter_up(h_order, previous+1) # The next batter.
             on_deck_stats = games.batting_stats(id, on_deck[0])
-            pitcher = a_pitcher
-            p_players = teams.list_players(a_team[0])
+            pitcher = a_pitcher # The current pitcher.
+            p_players = teams.list_players(a_team[0]) # List of players available for a pitcher change.
+
+            # This creates an at bat.
             if in_progress:
                 if at_bats.current_ab_id(id) is None:
                     at_bats.create_at_bat(id, batter[0], pitcher[0], a_team[0], h_team[0])
@@ -270,6 +275,7 @@ def game_page(id):
                                in_progress=in_progress, hits_home=hits_home, hits_away=hits_away)
     
     if request.method == "POST":
+        # This handles the form if the pitcher is changed.
         if "new_pitcher" in request.form:
             new_pitcher = request.form["new_pitcher"]
             if inning % 2 == 1:
@@ -282,9 +288,12 @@ def game_page(id):
                     return redirect(url_for("game_page", id=id))
                 else:
                     return render_template("error.html", message="Could not change pitcher")
+                
+        # This handles the form if a pitch was logged.
         elif "pitch" in request.form:
             result = request.form["pitch"]
             runners = []
+            # Check if there are any runners and add them to the list of runners.
             if "runner1" in request.form:
                 runner1 = games.parse_option(request.form["runner1"])
                 runners.append(runner1)
@@ -301,28 +310,41 @@ def game_page(id):
 @app.route("/games/order/<game_id>", methods=["GET", "POST"])
 def go_order(game_id):
     """Return the template for setting the batting order."""
-    h_team = games.home_team(game_id)
-    a_team = games.away_team(game_id)
+
+    h_team = games.home_team(game_id) # The home team.
+    a_team = games.away_team(game_id) # The away team.
+
     if request.method == "GET":
-        h_players = teams.list_players(h_team[0])
-        a_players = teams.list_players(a_team[0])
+        h_players = teams.list_players(h_team[0]) # Players on the home team.
+        a_players = teams.list_players(a_team[0]) # Players on the away team.
         return render_template("order.html", h_players=h_players, a_players=a_players, game_id=game_id)
+    
     if request.method == "POST":
+        # Retrieve the batting order for the home team and modify it so the player ids are integers.
         h_order = request.form.getlist("h_order")
         h_order = [player for player in h_order if player != "None"]
         h_order = [int(player_id) for player_id in h_order]
+
+        # Make sure that a batter is not in the order twice.
         if len(h_order) != len(set(h_order)):
             return render_template("error.html", message="Please select only unique batters")
-        h_pitcher = request.form["h_pitcher"]
+        
+        h_pitcher = request.form["h_pitcher"] # The starting pitcher for the home team.
+
+        # Retrieve the batting order for the away team and modify it so the player ids are integers.
         a_order = request.form.getlist("a_order")
         a_order = [player for player in a_order if player != "None"]
         a_order = [int(player_id) for player_id in a_order]
-        if len(a_order) < 2 or len(h_order) < 2:
-            return render_template("error.html", message="Please select at least 2 batters")
+
+        # Make sure that a batter is not in the order twice.
         if len(a_order) != len(set(a_order)):
             return render_template("error.html", message="Please select only unique batters")
-        a_pitcher = request.form["a_pitcher"]
+
+        # Make sure that there are at least two batters on each team.
+        if len(a_order) < 2 or len(h_order) < 2:
+            return render_template("error.html", message="Please select at least 2 batters")
+        
+        a_pitcher = request.form["a_pitcher"] # The starting pitcher for the away team.
+
         if games.set_order(game_id, h_order, a_order, h_pitcher, a_pitcher):
             return redirect(url_for("game_page", id=game_id))
-        else:
-            return render_template("error.html", message="Could not set batting order")

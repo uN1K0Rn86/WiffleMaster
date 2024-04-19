@@ -22,10 +22,12 @@ def add_team(team_id, league_id):
     return True
 
 def show_leagues():
+    """Return a list of leagues in the database."""
     sql = text("SELECT id, name FROM leagues")
     return db.session.execute(sql).fetchall()
 
 def show_league(league_id):
+    """Return a league's id and name."""
     sql = text("""SELECT id, name FROM leagues
                WHERE id=:league_id""")
     return db.session.execute(sql, {"league_id":league_id}).fetchone()

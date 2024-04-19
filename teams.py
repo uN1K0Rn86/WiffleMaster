@@ -32,14 +32,17 @@ def move_player(player_id, team_id):
     return True
 
 def show_teams():
+    """Return a list of all teams."""
     sql = text("SELECT id, name FROM teams")
     return db.session.execute(sql).fetchall()
 
 def show_team(id):
+    """Return a single team's id and name."""
     sql = text("SELECT id, name FROM teams WHERE id=:id")
     return db.session.execute(sql, {"id":id}).fetchone()
 
 def list_players(team_id):
+    """Return a list of players on a given team."""
     sql = text("""SELECT P.id, P.name
                FROM players P 
                LEFT JOIN team_players TP ON P.id=TP.player_id 
@@ -49,6 +52,7 @@ def list_players(team_id):
     return db.session.execute(sql, {"team_id":team_id}).fetchall()
 
 def list_players_other(team_id):
+    """Return a list of players that are not on a given team."""
     sql = text("""SELECT P.id, P.name, T.name
                FROM players P
                LEFT JOIN team_players TP ON P.id=TP.player_id
@@ -59,6 +63,7 @@ def list_players_other(team_id):
     return db.session.execute(sql, {"team_id":team_id}).fetchall()
 
 def record(team_id):
+    """Return a team's record i.e. their wins and losses."""
     sql = text("""SELECT
                         SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = :team_id)
                             OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = :team_id) THEN 1 ELSE 0 END) AS wins,
