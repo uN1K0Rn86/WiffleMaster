@@ -2,6 +2,13 @@
 {% block title %}Registration{% endblock %}
 
 {% block content %}
+{% if error_message %}
+    <fieldset class="text">
+        {{ error_message }}
+    </fieldset>
+    <br>
+    <br>
+{% endif %}
 <form id="users" action="/register" method="POST">
     <label for="username">Username: </label>
     <input type="text" name="username">

@@ -44,13 +44,13 @@ def register():
         password1 = request.form["password1"]
         password2 = request.form["password2"]
         if not username or not password1 or not password2:
-            return render_template("error.html", message="Please do not leave any blank fields.")
+            return render_template("register.html", error_message="Please do not leave any blank fields.")
         if password1 != password2:
-            return render_template("error.html", message="Passwords do not match")
+            return render_template("register.html", error_message="Passwords do not match.")
         if users.register(username, password1):
             return redirect("/")
         else:
-            return render_template("error.html", message="Registration was not successful")
+            return render_template("register.html", error_message="That username is already in use.")
         
 @app.route("/logout")
 def logout():
@@ -62,7 +62,7 @@ def logout():
 
 @app.route("/rules")
 def rules():
-    """Return the templates for rules.html."""
+    """Return the template for rules.html."""
     return render_template("rules.html")
 
 @app.route("/players", methods=["GET", "POST"])

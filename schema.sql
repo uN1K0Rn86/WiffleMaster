@@ -1,5 +1,5 @@
 CREATE TABLE users (id SERIAL PRIMARY KEY,
-                    username TEXT,
+                    username TEXT UNIQUE,
                     password TEXT);
 
 CREATE TABLE players (id SERIAL PRIMARY KEY,
