@@ -170,7 +170,11 @@ def league_page(id):
         league = leagues.show_league(id)
         league_teams = leagues.show_teams(id)
         others = leagues.show_other_teams(id)
-        return render_template("league.html", league=league, league_teams=league_teams, others=others)
+        table = leagues.league_table(id)
+        first_wins = table[0].wins
+        first_losses = table[0].losses
+        return render_template("league.html", league=league, league_teams=league_teams, others=others, table=table,
+                               first_wins=first_wins, first_losses=first_losses)
     if request.method == "POST":
         team = request.form["team"]
         direct = f"/leagues/{id}"

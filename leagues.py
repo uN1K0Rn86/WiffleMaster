@@ -58,3 +58,34 @@ def show_other_teams(league_id):
                 AND L.id=:league_id)
                """)
     return db.session.execute(sql, {"league_id":league_id}).fetchall()
+
+def league_table(league_id):
+    """Return wins and losses for all teams in this league."""
+    sql = text("""SELECT
+                        T.id AS id,
+                        T.name AS name,
+                        SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = T.id)
+                            OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END) AS wins,
+                        SUM(CASE WHEN (G.h_team_runs < G.a_team_runs AND G.h_team_id = T.id)
+                            OR (G.a_team_runs < G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END) AS losses,
+                        SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = T.id)
+                            OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END) /
+                            (SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = T.id)
+                            OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END) +
+                            SUM(CASE WHEN (G.h_team_runs < G.a_team_runs AND G.h_team_id = T.id)
+                            OR (G.a_team_runs < G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END)) AS win_pct
+                    FROM
+                        games G
+                    JOIN
+                        leagues L ON G.league_id = L.id
+                        AND L.id = :league_id
+                    JOIN
+                        teams T ON G.h_team_id = T.id OR G.a_team_id = T.id
+                    WHERE
+                        G.in_progress = false
+                    GROUP BY
+                        T.id
+                    ORDER BY
+                        win_pct DESC
+               """)
+    return db.session.execute(sql, {"league_id":league_id}).fetchall()
