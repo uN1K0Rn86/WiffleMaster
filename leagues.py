@@ -69,7 +69,7 @@ def league_table(league_id):
                         SUM(CASE WHEN (G.h_team_runs < G.a_team_runs AND G.h_team_id = T.id)
                             OR (G.a_team_runs < G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END) AS losses,
                         SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = T.id)
-                            OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END) /
+                            OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END) :: FLOAT /
                             (SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = T.id)
                             OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = T.id) THEN 1 ELSE 0 END) +
                             SUM(CASE WHEN (G.h_team_runs < G.a_team_runs AND G.h_team_id = T.id)
@@ -89,3 +89,59 @@ def league_table(league_id):
                         win_pct DESC
                """)
     return db.session.execute(sql, {"league_id":league_id}).fetchall()
+
+def batting_leaders(league_id, amount, offset, sort, desc=False):
+    """Return batting statistics for players in this league."""
+    direction = "DESC" if desc else "ASC"
+    order_by = f"ORDER BY {sort} {direction}"
+    sql = text(f"""SELECT
+                    P.id AS id,
+                    P.name AS name,
+                    COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) AS pa,
+                    COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS walks,
+                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS hits,
+                    COALESCE(SUM(CASE WHEN A.result IN ('Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS xbh,
+                    COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END), 0) AS hr,
+                    COALESCE(SUM(CASE WHEN A.result = 'Triple' THEN 1 ELSE 0 END), 0) AS triples,
+                    COALESCE(SUM(CASE WHEN A.result = 'Double' THEN 1 ELSE 0 END), 0) AS doubles,
+                    COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) AS singles,
+                    COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0) AS sacs,
+                    COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0) AS ab,
+                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END) :: FLOAT /
+                        (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)), 0) AS avg,
+                    (COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) :: FLOAT +
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
+                        COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) AS obp,
+                    ((COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) +
+                        2 * COALESCE(SUM(CASE WHEN A.result = 'Double' THEN 1 ELSE 0 END), 0) +
+                        3 * COALESCE(SUM(CASE WHEN A.result = 'Triple' THEN 1 ELSE 0 END), 0) +
+                        4 * COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END))) :: FLOAT /
+                        (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0))) AS slg,
+                    SUM(rbi) AS rbi,
+                    ((COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) :: FLOAT +
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
+                        COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0)) +
+                        (((COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) +
+                        2 * COALESCE(SUM(CASE WHEN A.result = 'Double' THEN 1 ELSE 0 END), 0) +
+                        3 * COALESCE(SUM(CASE WHEN A.result = 'Triple' THEN 1 ELSE 0 END), 0) +
+                        4 * COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END))) :: FLOAT /
+                        (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)))) AS ops
+                FROM at_bats A
+                JOIN players P ON A.batter_id = P.id
+                JOIN games G ON A.game_id = G.id
+                JOIN leagues L ON G.league_id = L.id
+                AND L.id = :league_id
+                GROUP BY P.id
+                {order_by}
+                LIMIT :amount
+                OFFSET :offset
+               """)
+    return db.session.execute(sql, {"league_id":league_id, "amount":amount, "offset":offset}).fetchall()

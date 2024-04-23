@@ -21,6 +21,46 @@
     </tr>
     {% endfor %}
 </table>
+
+<h3>League leaders</h3>
+<br>
+<b>Batting</b>
+<br><br>
+<table class="score">
+    <tr>
+        <td><b><a href="/leagues/{{ league[0] }}?sort=name&desc=False">Player</a></b></td>
+        <td><b>PA</b></td>
+        <td><b>AB</b></td>
+        <td><b>H</b></td>
+        <td><b>XBH</b></td>
+        <td><b>HR</b></td>
+        <td><b>RBI</b></td>
+        <td><b>BB</b></td>
+        <td><b>AVG</b></td>
+        <td><b>OBP</b></td>
+        <td><b>SLG</b></td>
+        <td><b>OPS</b></td>
+    </tr>
+    {% for player in batting_leaders %}
+        <tr>
+            <td>{{ player.name }}</td>
+            <td>{{ player.pa }}</td>
+            <td>{{ player.ab }}</td>
+            <td>{{ player.hits }}</td>
+            <td>{{ player.xbh }}</td>
+            <td>{{ player.hr }}</td>
+            <td>{{ player.rbi }}</td>
+            <td>{{ player.walks }}</td>
+            <td>{{ '%.3f' % player.avg }}</td>
+            <td>{{ '%.3f' % player.obp }}</td>
+            <td>{{ '%.3f' % player.slg }}</td>
+            <td>{{ '%.3f' % player.ops }}</td>
+        </tr>
+    {% endfor %}
+</table>
+<br>
+<b>Pitching</b>
+
 {% if session.user_id %}
     <h3>Add team</h3>
     <form id="players" action="/leagues/{{ league[0] }}" method="POST">

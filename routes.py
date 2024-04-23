@@ -173,13 +173,15 @@ def league_page(id):
         table = leagues.league_table(id)
         first_wins = table[0].wins
         first_losses = table[0].losses
+        batting_leaders = leagues.batting_leaders(id, 10, 0, "avg", False)
         return render_template("league.html", league=league, league_teams=league_teams, others=others, table=table,
-                               first_wins=first_wins, first_losses=first_losses)
+                               first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders)
     if request.method == "POST":
-        team = request.form["team"]
-        direct = f"/leagues/{id}"
-        if leagues.add_team(team, id):
-            return redirect(direct)
+        if "team" in request.form:
+            team = request.form["team"]
+            direct = f"/leagues/{id}"
+            if leagues.add_team(team, id):
+                return redirect(direct)
         
 @app.route("/games", methods=["GET", "POST"])
 def go_games():
