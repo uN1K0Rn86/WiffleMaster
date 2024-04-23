@@ -90,9 +90,9 @@ def league_table(league_id):
                """)
     return db.session.execute(sql, {"league_id":league_id}).fetchall()
 
-def batting_leaders(league_id, amount, offset, sort, desc=False):
+def batting_leaders(league_id, amount, offset, sort, asc=False):
     """Return batting statistics for players in this league."""
-    direction = "DESC" if desc else "ASC"
+    direction = "ASC" if asc else "DESC"
     order_by = f"ORDER BY {sort} {direction}"
     sql = text(f"""SELECT
                     P.id AS id,

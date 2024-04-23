@@ -26,9 +26,34 @@
 <br>
 <b>Batting</b>
 <br><br>
+<form action="/leagues/{{ league[0] }}" method="POST">
+    <label for="sort">Sort by: </label>
+    <select name="sort">
+        {% for value in batting_values %}
+            <option value="{{ value }}" {% if sort == value %} selected {% endif %}>{{ value | upper }}</option>
+        {% endfor %}
+    </select>
+    <select name="order">
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+    </select>
+    <label for="batting_size">Table size: </label>
+    <select name="batting_size">
+        <option value="10" {% if batting_size == 10 %} selected {% endif %}>10</option>
+        <option value="30" {% if batting_size == 30 %} selected {% endif %}>30</option>
+        <option value="50" {% if batting_size == 50 %} selected {% endif %}>50</option>
+    </select>
+    <label for="page">Page: </label>
+    <select name="page">
+        {% for i in range(1, len_batting // batting_size + 2) %}
+        <option value="{{ i }}" {% if page == i %} selected {% endif %}>{{ i }}</option>
+        {% endfor %}
+    </select><br><br>
+    <input type="submit" id="button" value="Sort">
+</form>
 <table class="score">
     <tr>
-        <td><b><a href="/leagues/{{ league[0] }}?sort=name&desc=False">Player</a></b></td>
+        <td><b>Player</b></td>
         <td><b>PA</b></td>
         <td><b>AB</b></td>
         <td><b>H</b></td>

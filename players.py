@@ -36,6 +36,9 @@ def list_teamless():
                ORDER BY name""")
     return db.session.execute(sql).fetchall()
 
+def batting_values():
+    return ["name", "pa", "ab", "hits", "xbh", "hr", "rbi", "avg", "obp", "slg", "ops"]
+
 def batting_stats(player_id):
     """Return batting statistics for a player."""
     sql = text("""SELECT

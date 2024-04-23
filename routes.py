@@ -166,22 +166,38 @@ def go_leagues():
 @app.route("/leagues/<int:id>", methods=["GET", "POST"])
 def league_page(id):
     """Return the template for the league in question."""
+    league = leagues.show_league(id)
+    league_teams = leagues.show_teams(id)
+    others = leagues.show_other_teams(id)
+    table = leagues.league_table(id)
+    first_wins = table[0].wins
+    first_losses = table[0].losses
+    batting_values = players.batting_values()
+
     if request.method == "GET":
-        league = leagues.show_league(id)
-        league_teams = leagues.show_teams(id)
-        others = leagues.show_other_teams(id)
-        table = leagues.league_table(id)
-        first_wins = table[0].wins
-        first_losses = table[0].losses
-        batting_leaders = leagues.batting_leaders(id, 10, 0, "avg", False)
+        batting_size = 10
+        batting_leaders = leagues.batting_leaders(id, batting_size, 0, "avg", False)
         return render_template("league.html", league=league, league_teams=league_teams, others=others, table=table,
-                               first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders)
+                               first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders,
+                               batting_size=batting_size, len_batting=len(batting_leaders), batting_values=batting_values)
+    
     if request.method == "POST":
         if "team" in request.form:
             team = request.form["team"]
             direct = f"/leagues/{id}"
             if leagues.add_team(team, id):
                 return redirect(direct)
+        if "sort" in request.form:
+            sort = request.form["sort"]
+            asc = False if request.form["order"] == "desc" else True
+            batting_size = int(request.form["batting_size"])
+            page = request.form["page"]
+            offset = (int(page) - 1) * batting_size
+            batting_leaders = leagues.batting_leaders(id, batting_size, offset, sort, asc)
+            return render_template("league.html", league=league, league_teams=league_teams, others=others, table=table,
+                               first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders,
+                               batting_size=batting_size, len_batting=len(batting_leaders), batting_values=batting_values,
+                               sort=sort, page=page)
         
 @app.route("/games", methods=["GET", "POST"])
 def go_games():
