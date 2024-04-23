@@ -175,6 +175,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
             games.update_runners(game_id, runners)
             sql = text("""UPDATE at_bats
                        SET result=:result, strikes = strikes + 1
+                       WHERE id=:ab_id
                        """)
         elif result == "Sac fly" or result == "Sac bunt":
             games.update_runners(game_id, runners)
