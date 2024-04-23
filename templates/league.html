@@ -17,7 +17,7 @@
         <td>{{ team.wins }}</td>
         <td>{{ team.losses }}</td>
         <td>{{ '%.3f' % team.win_pct }}</td>
-        <td>{{ (first_wins - team.wins + first_losses - team.losses) / 2 }}</td>
+        <td>{{ (team.losses - first_losses + first_wins - team.wins) / 2 }}</td>
     </tr>
     {% endfor %}
 </table>
