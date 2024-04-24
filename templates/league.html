@@ -142,6 +142,7 @@
         <td><b>BB</b></td>
         <td><b>BB/9</b></td>
         <td><b>BAA</b></td>
+        <td><b>R</b></td>
         <td><b>ERA</b></td>
     </tr>
     {% for player in pitching_leaders %}
@@ -154,6 +155,7 @@
             <td>{{ player.bb }}</td>
             <td>{{ '%.1f' % player.bb9 }}</td>
             <td>{{ '%.3f' % player.baa }}</td>
+            <td>{{ player.r }}</td>
             <td>{{ '%.2f' % player.era }}</td>
         </tr>
     {% endfor %}

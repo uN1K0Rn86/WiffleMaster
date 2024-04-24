@@ -40,7 +40,7 @@ def batting_values():
     return ["name", "g", "pa", "ab", "hits", "xbh", "hr", "rbi", "avg", "obp", "slg", "ops"]
 
 def pitching_values():
-    return ["name", "g", "IP", "k", "k9", "bb", "bb9", "baa", "era"]
+    return ["name", "g", "IP", "k", "k9", "bb", "bb9", "baa", "r", "era"]
 
 def batting_stats(player_id):
     """Return batting statistics for a player."""
