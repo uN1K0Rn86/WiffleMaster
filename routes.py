@@ -173,13 +173,18 @@ def league_page(id):
     first_wins = table[0].wins
     first_losses = table[0].losses
     batting_values = players.batting_values()
+    pitching_values = players.pitching_values()
 
     if request.method == "GET":
         batting_size = 10
+        pitching_size = 10
         batting_leaders = leagues.batting_leaders(id, batting_size, 0, "avg", False)
+        pitching_leaders = leagues.pitching_leaders(id, 10, 0, "era", False)
         return render_template("league.html", league=league, league_teams=league_teams, others=others, table=table,
                                first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders,
-                               batting_size=batting_size, len_batting=len(batting_leaders), batting_values=batting_values)
+                               batting_size=batting_size, len_batting=len(batting_leaders), batting_values=batting_values,
+                               pitching_leaders=pitching_leaders, pitching_values=pitching_values,
+                               pitching_size=pitching_size, len_pitching=len(pitching_leaders))
     
     if request.method == "POST":
         if "team" in request.form:
@@ -187,6 +192,7 @@ def league_page(id):
             direct = f"/leagues/{id}"
             if leagues.add_team(team, id):
                 return redirect(direct)
+
         if "sort" in request.form:
             sort = request.form["sort"]
             asc = False if request.form["order"] == "desc" else True
@@ -194,10 +200,30 @@ def league_page(id):
             page = request.form["page"]
             offset = (int(page) - 1) * batting_size
             batting_leaders = leagues.batting_leaders(id, batting_size, offset, sort, asc)
+            pitching_size = 10
+            pitching_leaders = leagues.pitching_leaders(id, pitching_size, 0, "era", False)
             return render_template("league.html", league=league, league_teams=league_teams, others=others, table=table,
                                first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders,
                                batting_size=batting_size, len_batting=len(batting_leaders), batting_values=batting_values,
-                               sort=sort, page=page)
+                               sort=sort, page=page, pitching_leaders=pitching_leaders, pitching_values=pitching_values,
+                               pitching_size=pitching_size, len_pitching=len(pitching_leaders))
+        
+        if "sort2" in request.form:
+            sort = request.form["sort2"]
+            asc = False if request.form["order2"] == "desc" else True
+            batting_size = 10
+        
+        else:
+            batting_size = 10
+            batting_leaders = leagues.batting_leaders(id, batting_size, 0, "avg", False)
+            pitching_size = 10
+            pitching_leaders = leagues.pitching_leaders(id, pitching_size, 0, "era", False)
+            error_message = "Please choose a team to add. If there are no teams available, create one from the Teams page."
+            return render_template("league.html", league=league, league_teams=league_teams, others=others, table=table,
+                                first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders,
+                                batting_size=batting_size, len_batting=len(batting_leaders), batting_values=batting_values,
+                                error_message=error_message, pitching_leaders=pitching_leaders, pitching_values=pitching_values,
+                                pitching_size=pitching_size, len_pitching=len(pitching_leaders), sort2=sort2, page2=page2)
         
 @app.route("/games", methods=["GET", "POST"])
 def go_games():

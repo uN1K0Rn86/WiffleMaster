@@ -59,6 +59,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
             runs += 1
         if runner[1] == 0:
             outs += 1
+            result += " +o"
     try:
         if result == "Strike (looking)":
             if strikes(ab_id) == 2:
@@ -171,6 +172,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
             if len(runners) == 1 and runners[0][1] != 0:
                 runners[0][1] = 0
                 outs += 1
+                result += " +o"
             games.add_runner(ab_id, game_id, 1)
             games.update_runners(game_id, runners)
             sql = text("""UPDATE at_bats

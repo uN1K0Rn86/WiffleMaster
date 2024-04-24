@@ -97,6 +97,7 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
     sql = text(f"""SELECT
                     P.id AS id,
                     P.name AS name,
+                    COUNT(DISTINCT A.game_id) AS g,
                     COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) AS pa,
                     COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS walks,
                     COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS hits,
@@ -136,6 +137,42 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
                         COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)))) AS ops
                 FROM at_bats A
                 JOIN players P ON A.batter_id = P.id
+                JOIN games G ON A.game_id = G.id
+                JOIN leagues L ON G.league_id = L.id
+                AND L.id = :league_id
+                GROUP BY P.id
+                {order_by}
+                LIMIT :amount
+                OFFSET :offset
+               """)
+    return db.session.execute(sql, {"league_id":league_id, "amount":amount, "offset":offset}).fetchall()
+
+def pitching_leaders(league_id, amount, offset, sort, asc=False):
+    """Return pitching statistics for players in this league."""
+    direction = "ASC" if asc else "DESC"
+    order_by = f"ORDER BY {sort} {direction}"
+    outs = """(COALESCE(SUM(CASE WHEN A.result LIKE '%out%' THEN 1 ELSE 0 END), 0) +
+              COALESCE(SUM(CASE WHEN A.result LIKE '%+o%' THEN 1 ELSE 0 END), 0) +
+              COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0))"""
+    sql = text(f"""SELECT
+                    P.id AS id,
+                    P.name AS name,
+                    COUNT(DISTINCT A.game_id) AS g,
+                    {outs} AS outs,
+                    COALESCE(SUM(CASE WHEN A.result IN ('Strikeout', 'Strikeout (s)') THEN 1 ELSE 0 END), 0) AS k,
+                    (COALESCE(SUM(CASE WHEN A.result IN ('Strikeout', 'Strikeout (s)') THEN 1 ELSE 0 END), 0)) ::FLOAT /
+                        ((COALESCE(SUM(CASE WHEN A.result LIKE '%out' THEN 1 ELSE 0 END), 1)) ::FLOAT / 27) AS k9,
+                    COALESCE(SUM(CASE WHEN A.result in ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS bb,
+                    (COALESCE(SUM(CASE WHEN A.result in ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) ::FLOAT /
+                        ((COALESCE(SUM(CASE WHEN A.result LIKE '%out' THEN 1 ELSE 0 END), 1)) ::FLOAT / 27) AS bb9,
+                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS hits,
+                    (COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0)) ::FLOAT /
+                        ((COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0)) +
+                        COALESCE(SUM(CASE WHEN A.result LIKE '%out%' THEN 1 ELSE 0 END), 1) ::FLOAT) AS baa,
+                    COALESCE(SUM(rbi), 0) ::FLOAT /
+                        ((COALESCE(SUM(CASE WHEN A.result LIKE '%out%' THEN 1 ELSE 0 END), 1)) ::FLOAT / 27) AS era
+                FROM at_bats A
+                JOIN players P ON A.pitcher_id = P.id
                 JOIN games G ON A.game_id = G.id
                 JOIN leagues L ON G.league_id = L.id
                 AND L.id = :league_id

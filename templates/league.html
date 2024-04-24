@@ -2,6 +2,9 @@
 {% block title %}{{ league[1] }}{% endblock %}
 
 {% block content %}
+{% if error_message %}
+    {{ error_message }}
+{% endif %}
 <h2>{{ league[1] }}</h2>
 <table class="score">
     <tr>
@@ -21,6 +24,20 @@
     </tr>
     {% endfor %}
 </table>
+
+{% if session.user_id %}
+    <h3>Add team</h3>
+    <form id="players" action="/leagues/{{ league[0] }}" method="POST">
+        <label for="team">Choose a team: </label>
+        <select name="team">
+        {% for team in others %}
+            <option value="{{ team[0] }}">{{ team[1] }}</option>
+        {% endfor %}
+        </select>
+        <input id="button" type="submit" value="Add team">
+    </form>
+    <br>
+{% endif %}
 
 <h3>League leaders</h3>
 <br>
@@ -54,6 +71,7 @@
 <table class="score">
     <tr>
         <td><b>Player</b></td>
+        <td><b>G</b></td>
         <td><b>PA</b></td>
         <td><b>AB</b></td>
         <td><b>H</b></td>
@@ -69,6 +87,7 @@
     {% for player in batting_leaders %}
         <tr>
             <td>{{ player.name }}</td>
+            <td>{{ player.g }}</td>
             <td>{{ player.pa }}</td>
             <td>{{ player.ab }}</td>
             <td>{{ player.hits }}</td>
@@ -84,19 +103,60 @@
     {% endfor %}
 </table>
 <br>
-<b>Pitching</b>
 
-{% if session.user_id %}
-    <h3>Add team</h3>
-    <form id="players" action="/leagues/{{ league[0] }}" method="POST">
-        <label for="team">Choose a team: </label>
-        <select name="team">
-        {% for team in others %}
-            <option value="{{ team[0] }}">{{ team[1] }}</option>
+<b>Pitching</b>
+<br><br>
+
+<form action="/leagues/{{ league[0] }}" method="POST">
+    <label for="sort2">Sort by: </label>
+    <select name="sort2">
+        {% for value in pitching_values %}
+            <option value="{{ value }}" {% if sort2 == value %} selected {% endif %}>{{ value | upper }}</option>
         {% endfor %}
-        </select>
-        <input id="button" type="submit" value="Add team">
-    </form>
-    <br>
-{% endif %}
+    </select>
+    <select name="order2">
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+    </select>
+    <label for="pitching_size">Table size: </label>
+    <select name="pitching_size">
+        <option value="10" {% if pitching_size == 10 %} selected {% endif %}>10</option>
+        <option value="30" {% if pitching_size == 30 %} selected {% endif %}>30</option>
+        <option value="50" {% if pitching_size == 50 %} selected {% endif %}>50</option>
+    </select>
+    <label for="page2">Page: </label>
+    <select name="page2">
+        {% for i in range(1, len_pitching // pitching_size + 2) %}
+        <option value="{{ i }}" {% if page2 == i %} selected {% endif %}>{{ i }}</option>
+        {% endfor %}
+    </select><br><br>
+    <input type="submit" id="button" value="Sort">
+</form>
+<table class="score">
+    <tr>
+        <td><b>Player</b></td>
+        <td><b>G</b></td>
+        <td><b>IP</b></td>
+        <td><b>K</b></td>
+        <td><b>K/9</b></td>
+        <td><b>BB</b></td>
+        <td><b>BB/9</b></td>
+        <td><b>BAA</b></td>
+        <td><b>ERA</b></td>
+    </tr>
+    {% for player in pitching_leaders %}
+        <tr>
+            <td>{{ player.name }}</td>
+            <td>{{ player.g }}</td>
+            <td>{{ player.outs // 3 }}.{{ player.outs % 3 }}</td>
+            <td>{{ player.k }}</td>
+            <td>{{ '%.1f' % player.k9 }}</td>
+            <td>{{ player.bb }}</td>
+            <td>{{ '%.1f' % player.bb9 }}</td>
+            <td>{{ '%.3f' % player.baa }}</td>
+            <td>{{ '%.2f' % player.era }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
 {% endblock %}
