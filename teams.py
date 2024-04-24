@@ -65,10 +65,10 @@ def list_players_other(team_id):
 def record(team_id):
     """Return a team's record i.e. their wins and losses."""
     sql = text("""SELECT
-                        SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = :team_id)
-                            OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = :team_id) THEN 1 ELSE 0 END) AS wins,
-                        SUM(CASE WHEN (G.h_team_runs < G.a_team_runs AND G.h_team_id = :team_id)
-                            OR (G.a_team_runs < G.h_team_runs AND G.a_team_id = :team_id) THEN 1 ELSE 0 END) AS losses
+                        COALESCE(SUM(CASE WHEN (G.h_team_runs > G.a_team_runs AND G.h_team_id = :team_id)
+                            OR (G.a_team_runs > G.h_team_runs AND G.a_team_id = :team_id) THEN 1 ELSE 0 END), 0) AS wins,
+                        COALESCE(SUM(CASE WHEN (G.h_team_runs < G.a_team_runs AND G.h_team_id = :team_id)
+                            OR (G.a_team_runs < G.h_team_runs AND G.a_team_id = :team_id) THEN 1 ELSE 0 END), 0) AS losses
                     FROM
                         games G
                     JOIN
