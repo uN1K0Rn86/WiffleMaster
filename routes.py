@@ -125,9 +125,7 @@ def team_page(id):
     if request.method == "GET":
         team = teams.show_team(id)
         team_players_ids = [player[0] for player in teams.list_players(id)]
-        print(team_players_ids)
         team_players = [players.batting_stats(player) for player in team_players_ids]
-        print(team_players)
         teamless = players.list_teamless()
         others = teams.list_players_other(id)
         record = teams.record(id)
@@ -214,6 +212,16 @@ def league_page(id):
             sort = request.form["sort2"]
             asc = False if request.form["order2"] == "desc" else True
             batting_size = 10
+            page = request.form["page2"]
+            pitching_size = int(request.form["pitching_size"])
+            offset = (int(page) - 1) * pitching_size
+            batting_leaders = leagues.batting_leaders(id, batting_size, 0, "avg", False)
+            pitching_leaders = leagues.pitching_leaders(id, pitching_size, offset, sort, asc)
+            return render_template("league.html", league=league, league_teams=league_teams, others=others, table=table,
+                               first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders,
+                               batting_size=batting_size, len_batting=len(batting_leaders), batting_values=batting_values,
+                               sort=sort, page=page, pitching_leaders=pitching_leaders, pitching_values=pitching_values,
+                               pitching_size=pitching_size, len_pitching=len(pitching_leaders))
         
         else:
             batting_size = 10
