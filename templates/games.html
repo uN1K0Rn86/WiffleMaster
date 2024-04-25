@@ -76,6 +76,7 @@
         {% endfor %}
     </select>
     <input id="button" type="submit" value="New game">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 </form>
 {% else %}
 Please login to start a game

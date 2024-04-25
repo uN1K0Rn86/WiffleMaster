@@ -39,6 +39,7 @@
         {% endfor %}
         </select>
         <input id="button" type="submit" value="Add team">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     </form>
     <br>
 {% endif %}
@@ -71,6 +72,7 @@
         {% endfor %}
     </select><br><br>
     <input type="submit" id="button" value="Sort">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 </form>
 <table class="score">
     <tr>
@@ -135,6 +137,7 @@
         {% endfor %}
     </select><br><br>
     <input type="submit" id="button" value="Sort">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 </form>
 <table class="score">
     <tr>

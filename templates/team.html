@@ -2,6 +2,13 @@
 {% block title %}{{ team[1] }}{% endblock %}
 
 {% block content %}
+{% if error_message %}
+    <fieldset class="text">
+        {{ error_message }}
+    </fieldset>
+    <br>
+    <br>
+{% endif %}
 <h2>{{ team[1] }}</h2>
 <table class="score">
     <tr>
@@ -80,6 +87,7 @@
         {% endfor %}
         </select>
         <input id="button" type="submit" value="Add player">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     </form>
     <br>
     <h3>Move player from another team</h3>
@@ -91,6 +99,7 @@
         {% endfor %}
         </select>
         <input id="button" type="submit" value="Move player">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     </form>
 {% endif %}
 {% endblock %}

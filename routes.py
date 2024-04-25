@@ -1,11 +1,19 @@
 from app import app
-from flask import render_template, request, redirect, url_for, session
+from flask import render_template, request, redirect, url_for, session, abort
 import users
 import players
 import teams
 import leagues
 import games
 import at_bats
+
+@app.before_request
+def csrf_protect():
+    excluded = ["/login", "/register"]
+    if request.method == "POST" and request.path not in excluded:
+        csrf_token = session["csrf_token"]
+        if not csrf_token or csrf_token != request.form["csrf_token"]:
+            abort(403)
 
 @app.route("/")
 def index():
@@ -125,13 +133,13 @@ def go_teams():
         
 @app.route("/teams/<int:id>", methods=["GET", "POST"])
 def team_page(id):
+    team = teams.show_team(id)
+    team_players_ids = [player[0] for player in teams.list_players(id)]
+    team_players = [players.batting_stats(player) for player in team_players_ids]
+    teamless = players.list_teamless()
+    others = teams.list_players_other(id)
+    record = teams.record(id)
     if request.method == "GET":
-        team = teams.show_team(id)
-        team_players_ids = [player[0] for player in teams.list_players(id)]
-        team_players = [players.batting_stats(player) for player in team_players_ids]
-        teamless = players.list_teamless()
-        others = teams.list_players_other(id)
-        record = teams.record(id)
         return render_template("team.html", team=team, team_players=team_players, teamless=teamless, others=others,
                                record=record)
     
@@ -142,10 +150,16 @@ def team_page(id):
             player_id = request.form["players"]
             if teams.add_player(player_id, team_id):
                 return redirect(direct)
+        
         elif "move" in request.form:
             move_p_id = request.form["move"]
             if teams.move_player(move_p_id, team_id):
                 return redirect(direct)
+            
+        else:
+            error_message = "Please choose a player to add. If there are no players, create one from the players page."
+            return render_template("team.html", team=team, team_players=team_players, teamless=teamless, others=others,
+                            record=record, error_message=error_message)
         
 @app.route("/leagues", methods=["GET", "POST"])
 def go_leagues():
@@ -255,14 +269,15 @@ def go_games():
         h_team_id = int(request.form["h_team"])
         league_id = int(request.form["league"])
         innings = int(request.form["innings"])
+        error_message = None
 
         if len(teams.list_players(a_team_id)) < 2:
             error_message = "The away team does not have enough players. Please make sure there are at least two players on every team."
 
-        elif len(teams.list_players(h_team_id)) < 2:
+        if len(teams.list_players(h_team_id)) < 2:
             error_message = "The home team does not have enough players. Please make sure there are at least two players on every team."
 
-        elif a_team_id == h_team_id:
+        if a_team_id == h_team_id:
             error_message = "Please choose two different teams."
         
         if error_message:

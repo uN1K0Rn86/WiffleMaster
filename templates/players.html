@@ -52,6 +52,7 @@
             <label for="throws2">Right</label>
         </div>
         <input id="button" type="submit" value="Add player">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     </form>
 {% if message %}
     {{ message }}
