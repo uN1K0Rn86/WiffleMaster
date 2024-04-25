@@ -256,14 +256,23 @@ def go_games():
         league_id = int(request.form["league"])
         innings = int(request.form["innings"])
 
-        if a_team_id == h_team_id:
-            return render_template("games.html", error_message="Please choose two different teams.",
-                                   all_teams=all_teams, all_leagues=all_leagues, in_progress=in_progress,
-                                   latest=latest, a_team_id=a_team_id, h_team_id=h_team_id, league_id=league_id,
-                                   innings=innings)
+        if len(teams.list_players(a_team_id)) < 2:
+            error_message = "The away team does not have enough players. Please make sure there are at least two players on every team."
+
+        elif len(teams.list_players(h_team_id)) < 2:
+            error_message = "The home team does not have enough players. Please make sure there are at least two players on every team."
+
+        elif a_team_id == h_team_id:
+            error_message = "Please choose two different teams."
         
-        game_id = games.new_game(innings, a_team_id, h_team_id, league_id)
-        return redirect(url_for("go_order", game_id=game_id))
+        if error_message:
+            return render_template("games.html", all_teams=all_teams, all_leagues=all_leagues, in_progress=in_progress,
+                                   latest=latest, a_team_id=a_team_id, h_team_id=h_team_id, league_id=league_id, innings=innings,
+                                   error_message=error_message)
+        
+        else:
+            game_id = games.new_game(innings, a_team_id, h_team_id, league_id)
+            return redirect(url_for("go_order", game_id=game_id))
 
 @app.route("/games/<int:id>", methods=["GET", "POST"])
 def game_page(id):
