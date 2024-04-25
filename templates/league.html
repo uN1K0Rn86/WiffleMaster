@@ -3,7 +3,11 @@
 
 {% block content %}
 {% if error_message %}
-    {{ error_message }}
+    <fieldset class="text">
+        {{ error_message }}
+    </fieldset>
+    <br>
+    <br>
 {% endif %}
 <h2>{{ league[1] }}</h2>
 <table class="score">

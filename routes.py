@@ -114,6 +114,9 @@ def go_teams():
         return render_template("teams.html", team_list=team_list)
     if request.method == "POST":
         name = request.form["name"]
+        if name == "":
+            return render_template("teams.html", error_message="Please provide a name for the team.",
+                                   team_list=team_list)
         if teams.add_team(name):
             return redirect("/teams")
         else:
@@ -233,7 +236,7 @@ def league_page(id):
                                 first_wins=first_wins, first_losses=first_losses, batting_leaders=batting_leaders,
                                 batting_size=batting_size, len_batting=len(batting_leaders), batting_values=batting_values,
                                 error_message=error_message, pitching_leaders=pitching_leaders, pitching_values=pitching_values,
-                                pitching_size=pitching_size, len_pitching=len(pitching_leaders), sort2=sort2, page2=page2)
+                                pitching_size=pitching_size, len_pitching=len(pitching_leaders))
         
 @app.route("/games", methods=["GET", "POST"])
 def go_games():
