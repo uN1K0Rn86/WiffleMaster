@@ -1,3 +1,13 @@
+DROP TABLE IF EXISTS runners;
+DROP TABLE IF EXISTS at_bats;
+DROP TABLE IF EXISTS games;
+DROP TABLE IF EXISTS league_teams;
+DROP TABLE IF EXISTS team_players;
+DROP TABLE IF EXISTS leagues;
+DROP TABLE IF EXISTS teams;
+DROP TABLE IF EXISTS players;
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE users (id SERIAL PRIMARY KEY,
                     username TEXT UNIQUE,
                     password TEXT);

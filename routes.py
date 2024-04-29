@@ -187,8 +187,11 @@ def league_page(id):
     league_teams = leagues.show_teams(id)
     others = leagues.show_other_teams(id)
     table = leagues.league_table(id)
-    first_wins = table[0].wins
-    first_losses = table[0].losses
+    if table:
+        first_wins = table[0].wins
+        first_losses = table[0].losses
+    else:
+        first_wins = first_losses = 0
     batting_values = players.batting_values()
     pitching_values = players.pitching_values()
 
@@ -391,15 +394,11 @@ def game_page(id):
         if "new_pitcher" in request.form:
             new_pitcher = request.form["new_pitcher"]
             if inning % 2 == 1:
-                if games.change_h_pitcher(id, new_pitcher):
-                    return redirect(url_for("game_page", id=id))
-                else:
-                    return render_template("error.html", message="Could not change pitcher")
+                games.change_h_pitcher(id, new_pitcher)
+                return redirect(url_for("game_page", id=id))
             else:
-                if games.change_a_pitcher(id, new_pitcher):
-                    return redirect(url_for("game_page", id=id))
-                else:
-                    return render_template("error.html", message="Could not change pitcher")
+                games.change_a_pitcher(id, new_pitcher)
+                return redirect(url_for("game_page", id=id))
                 
         # This handles the form if a pitch was logged.
         elif "pitch" in request.form:
