@@ -317,6 +317,7 @@ def add_out(game_id):
                     WHERE id=:game_id
                     """)
         elif get_outs(game_id) == 2 and inning >= total and inning % 2 == 0 and runs_away(game_id) != runs_home(game_id):
+            lob(game_id)
             sql = text("""UPDATE games
                        SET outs = 3
                        WHERE id=:game_id
@@ -394,7 +395,8 @@ def lob(game_id):
     try:
         sql = text("""UPDATE runners
                     SET status=5
-                    WHERE game_id=:game_id
+                        WHERE game_id=:game_id
+                        AND status NOT IN (0, 4)
                     """)
         db.session.execute(sql, {"game_id":game_id})
         db.session.commit()

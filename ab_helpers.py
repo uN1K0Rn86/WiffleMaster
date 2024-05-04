@@ -92,6 +92,7 @@ def base_hit(result, ab_id, game_id, runners):
     return sql
 
 def fielders_choice(ab_id, game_id, runners):
+    """Handle the result for fielder's choice."""
     if len(runners) == 1 and runners[0][1] != 0:
         runners[0][1] = 0
     games.add_runner(ab_id, game_id, 1)
@@ -104,6 +105,7 @@ def fielders_choice(ab_id, game_id, runners):
     return sql
 
 def sac(game_id, runners, outs):
+    """Handle the result for a sac fly or sac bunt."""
     outs = outs
     games.update_runners(game_id, runners)
     sql = text("""UPDATE at_bats
@@ -115,6 +117,7 @@ def sac(game_id, runners, outs):
     return sql, outs
 
 def out(game_id, runners, outs):
+    """Handle the result for an out on a ball in play."""
     outs = outs
     games.update_runners(game_id, runners)
     sql = text("""UPDATE at_bats

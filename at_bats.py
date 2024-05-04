@@ -87,7 +87,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
             sql = ab_helpers.base_hit(result, ab_id, game_id, runners)
 
         elif result == "Fielder's choice":
-            sql = ab_helpers.fielders_choice(ab_id, game_id, result, runners)
+            sql = ab_helpers.fielders_choice(ab_id, game_id, runners)
 
         elif result == "Sac fly" or result == "Sac bunt":
             sql, outs = ab_helpers.sac(game_id, runners, outs)
