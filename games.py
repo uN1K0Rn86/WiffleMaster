@@ -92,6 +92,16 @@ def get_a_order(id):
                WHERE id=:id""")
     return db.session.execute(sql, {"id":id}).fetchone()[0]
 
+def validate_order(h_order, a_order):
+    """Validate the batting order."""
+    if len(a_order) != len(set(a_order)) or len(h_order) != len(set(h_order)):
+        return "Please select only unique batters."
+
+    if len(a_order) < 2 or len(h_order) < 2:
+        return "Please select at least 2 batters for both teams."
+
+    return None
+
 def get_h_pitcher(id):
     """Return the id of the pitcher for the home team."""
     sql = text("""SELECT h_pitcher

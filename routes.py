@@ -447,17 +447,12 @@ def go_order(game_id):
         h_order = [int(player_id) for player_id in h_order if player_id != "None"]
         a_order = [int(player_id) for player_id in a_order if player_id != "None"]
 
-        # Make sure that a batter is not in the order twice.
-        if len(a_order) != len(set(a_order)) or len(h_order) != len(set(h_order)):
+        # Make sure that both batting orders have at least 2 batters and only unique batters.
+        error_message = games.validate_order(h_order, a_order)
+        if error_message:
             return render_template("order.html", h_players=h_players, a_players=a_players, game_id=game_id,
-                                   error_message="Please select only unique batters", a_order=a_order,
-                                   h_order=h_order, h_pitcher=h_pitcher, a_pitcher=a_pitcher)
-
-        # Make sure that there are at least two batters on each team.
-        if len(a_order) < 2 or len(h_order) < 2:
-            return render_template("order.html", h_players=h_players, a_players=a_players, game_id=game_id,
-                                   error_message="Please select at least 2 batters for both teams.", a_order=a_order,
-                                   h_order=h_order, h_pitcher=h_pitcher, a_pitcher=a_pitcher)
+                                   error_message=error_message, a_order=a_order, h_order=h_order,
+                                   h_pitcher=h_pitcher, a_pitcher=a_pitcher)
 
         if games.set_order(game_id, h_order, a_order, h_pitcher, a_pitcher):
             return redirect(url_for("game_page", id=game_id))
