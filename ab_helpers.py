@@ -50,8 +50,8 @@ def ball(result, runners, ab_id, game_id, three=False):
 
         games.add_runner(ab_id, game_id, 1)
         games.update_runners(game_id, runners)
-        sql = text(f"""UPDATE at_bats
-                SET balls = balls + 1, result = '{result}'
+        sql = text("""UPDATE at_bats
+                SET balls = balls + 1, result = :result
                 WHERE id=:ab_id
                 """)
     
@@ -84,9 +84,43 @@ def base_hit(result, ab_id, game_id, runners):
         at_bats.rbi(ab_id, 1)
         games.add_runs(game_id, 1)
 
-    sql = text(f"""UPDATE at_bats
-                SET result='{result}', strikes = strikes + 1
+    sql = text("""UPDATE at_bats
+                SET result=:result, strikes = strikes + 1
                 WHERE id=:ab_id
                 """)
     
     return sql
+
+def fielders_choice(ab_id, game_id, runners):
+    if len(runners) == 1 and runners[0][1] != 0:
+        runners[0][1] = 0
+    games.add_runner(ab_id, game_id, 1)
+    games.update_runners(game_id, runners)
+    sql = text("""UPDATE at_bats
+                SET result=:result, strikes = strikes + 1
+                WHERE id=:ab_id
+                """)
+    
+    return sql
+
+def sac(game_id, runners, outs):
+    outs = outs
+    games.update_runners(game_id, runners)
+    sql = text("""UPDATE at_bats
+                SET result=:result, strikes = strikes + 1
+                WHERE id=:ab_id
+                """)
+    outs += 1
+
+    return sql, outs
+
+def out(game_id, runners, outs):
+    outs = outs
+    games.update_runners(game_id, runners)
+    sql = text("""UPDATE at_bats
+                SET result=:result, strikes = strikes + 1
+                WHERE id=:ab_id
+                """)
+    outs += 1
+
+    return sql, outs

@@ -87,30 +87,13 @@ def handle_pitch(result, ab_id, game_id, runners: list):
             sql = ab_helpers.base_hit(result, ab_id, game_id, runners)
 
         elif result == "Fielder's choice":
-            if len(runners) == 1 and runners[0][1] != 0:
-                runners[0][1] = 0
-                outs += 1
-                result += " +o"
-            games.add_runner(ab_id, game_id, 1)
-            games.update_runners(game_id, runners)
-            sql = text("""UPDATE at_bats
-                       SET result=:result, strikes = strikes + 1
-                       WHERE id=:ab_id
-                       """)
+            sql = ab_helpers.fielders_choice(ab_id, game_id, result, runners)
+
         elif result == "Sac fly" or result == "Sac bunt":
-            games.update_runners(game_id, runners)
-            sql = text("""UPDATE at_bats
-                       SET result=:result, strikes = strikes + 1
-                       WHERE id=:ab_id
-                       """)
-            outs += 1
+            sql, outs = ab_helpers.sac(game_id, runners, outs)
+
         else:
-            games.update_runners(game_id, runners)
-            sql = text("""UPDATE at_bats
-                       SET result=:result, strikes = strikes + 1
-                       WHERE id=:ab_id
-                       """)
-            outs += 1
+            sql, outs = ab_helpers.out(game_id, runners, outs)
 
         for runner in runners:
             if runner[1] == 4:
