@@ -55,12 +55,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
        to finish the game if the home team obtains a lead in the final inning."""
     outs = 0
     runs = 0
-    for runner in runners:
-        if runner[1] == 4:
-            runs += 1
-        if runner[1] == 0:
-            outs += 1
-            result += " +o"
+
     try:
         if result == "Strike (looking)":
             if strikes(ab_id) == 2:
@@ -84,42 +79,13 @@ def handle_pitch(result, ab_id, game_id, runners: list):
 
         elif result == "Ball" or result == "Intentional Walk":
             if balls(ab_id) == 3:
-                sql, runs = ab_helpers.ball(result, runners, 0, ab_id, game_id, True)
+                sql = ab_helpers.ball(result, runners, ab_id, game_id, True)
             else:
-                sql, runs = ab_helpers.ball(result, runners, 0, ab_id, game_id, False)
+                sql = ab_helpers.ball(result, runners, ab_id, game_id, False)
 
-        elif result == "Single":
-            games.add_runner(ab_id, game_id, 1)
-            games.update_runners(game_id, runners)
-            sql = text("""UPDATE at_bats
-                       SET result=:result, strikes = strikes + 1
-                       WHERE id=:ab_id
-                       """)
-        elif result == "Double":
-            games.add_runner(ab_id, game_id, 2)
-            games.update_runners(game_id, runners)
-            sql = text("""UPDATE at_bats
-                       SET result=:result, strikes = strikes + 1
-                       WHERE id=:ab_id
-                       """)
-        elif result == "Triple":
-            games.add_runner(ab_id, game_id, 3)
-            games.update_runners(game_id, runners)
-            sql = text("""UPDATE at_bats
-                       SET result=:result, strikes = strikes + 1
-                       WHERE id=:ab_id
-                       """)
-        elif result == "Home Run":
-            games.add_runner(ab_id, game_id, 4)
-            runs = 1
-            for runner in runners:
-                runner[1] = 4
-                runs += 1
-            games.update_runners(game_id, runners)
-            sql = text("""UPDATE at_bats
-                       SET result=:result, strikes = strikes + 1
-                       WHERE id=:ab_id
-                       """)
+        elif result == "Single" or result == "Double" or result == "Triple" or result == "Home Run":
+            sql = ab_helpers.base_hit(result, ab_id, game_id, runners)
+
         elif result == "Fielder's choice":
             if len(runners) == 1 and runners[0][1] != 0:
                 runners[0][1] = 0
@@ -145,6 +111,13 @@ def handle_pitch(result, ab_id, game_id, runners: list):
                        WHERE id=:ab_id
                        """)
             outs += 1
+
+        for runner in runners:
+            if runner[1] == 4:
+                runs += 1
+            if runner[1] == 0:
+                outs += 1
+                result += " +o"
             
         if runs > 0:
             rbi(ab_id, runs)
@@ -182,7 +155,7 @@ def rbi(ab_id, rbi):
     """Add an rbi (run brought in) to an at bat."""
     try:
         sql = text("""UPDATE at_bats
-                   SET rbi=:rbi
+                   SET rbi= rbi + :rbi
                    WHERE id=:ab_id
                    """)
         db.session.execute(sql, {"rbi":rbi, "ab_id":ab_id})

@@ -4,6 +4,7 @@ import games
 import at_bats
 
 def strike_looking(two=False, out=""):
+    """Handle the result for strike (looking)."""
     if two:
         out = ", result = 'Strikeout'"
     return f"""UPDATE at_bats
@@ -12,6 +13,7 @@ def strike_looking(two=False, out=""):
                 """
 
 def strike_swinging(two=False, out=""):
+    """Handle the result for strike (swinging)."""
     if two:
         out = ", result = 'Strikeout (s)'"
     return f"""UPDATE at_bats
@@ -20,6 +22,7 @@ def strike_swinging(two=False, out=""):
                 """
 
 def foul(two=False):
+    """Handle the result for a foul ball."""
     if two:
         result = "fouls = fouls + 1"
     else:
@@ -29,7 +32,8 @@ def foul(two=False):
                 WHERE id=:ab_id
                 """
 
-def ball(result, runners, runs, ab_id, game_id, three=False):
+def ball(result, runners, ab_id, game_id, three=False):
+    """Handle the result for a ball or intentional walk."""
     if three or result == "Intentional Walk":
         if result == "Intentional Walk":
             result = "IBB"
@@ -43,7 +47,7 @@ def ball(result, runners, runs, ab_id, game_id, three=False):
                         runners[1][1] += 1
                         if len(runners) > 2:
                             runners[2][1] += 1
-                            runs += 1
+
         games.add_runner(ab_id, game_id, 1)
         games.update_runners(game_id, runners)
         sql = text(f"""UPDATE at_bats
@@ -57,4 +61,32 @@ def ball(result, runners, runs, ab_id, game_id, three=False):
                     WHERE id=:ab_id
                     """)
         
-    return sql, runs
+    return sql
+
+def base_hit(result, ab_id, game_id, runners):
+    """Handle the result for a base hit"""
+    runs = 0
+    if result == "Home Run":
+        runs = 1
+        for runner in runners:
+            runner[1] = 4
+        base = 4
+    elif result == "Triple":
+        base = 3
+    elif result == "Double":
+        base = 2
+    elif result == "Single":
+        base = 1
+
+    games.add_runner(ab_id, game_id, base)
+    games.update_runners(game_id, runners)
+    if runs == 1:
+        at_bats.rbi(ab_id, 1)
+        games.add_runs(game_id, 1)
+
+    sql = text(f"""UPDATE at_bats
+                SET result='{result}', strikes = strikes + 1
+                WHERE id=:ab_id
+                """)
+    
+    return sql
