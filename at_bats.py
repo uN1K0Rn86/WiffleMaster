@@ -1,6 +1,7 @@
 from sqlalchemy.sql import text
 from db import db
 import games
+import ab_helpers
 
 def pitch_results():
     """Return a list of possible results for any pitch."""
@@ -63,79 +64,30 @@ def handle_pitch(result, ab_id, game_id, runners: list):
     try:
         if result == "Strike (looking)":
             if strikes(ab_id) == 2:
-                sql = text("""UPDATE at_bats
-                       SET strikes = strikes + 1, result = 'Strikeout'
-                       WHERE id=:ab_id
-                       """)
+                sql = text(ab_helpers.strike_looking(True))
                 outs += 1
             else:
-                sql = text("""UPDATE at_bats
-                       SET strikes = strikes + 1
-                       WHERE id=:ab_id
-                       """)
+                sql = text(ab_helpers.strike_looking())
+
         elif result == "Strike (swinging)":
             if strikes(ab_id) == 2:
-                sql = text("""UPDATE at_bats
-                       SET strikes = strikes + 1, strswi = strswi + 1, result = 'Strikeout (s)'
-                       WHERE id=:ab_id
-                       """)
+                sql = text(ab_helpers.strike_swinging(True))
                 outs += 1
             else:
-                sql = text("""UPDATE at_bats
-                       SET strikes = strikes + 1, strswi = strswi + 1
-                       WHERE id=:ab_id
-                       """)
+                sql = text(ab_helpers.strike_swinging())
+
         elif result == "Foul":
             if strikes(ab_id) == 2:
-                sql = text("""UPDATE at_bats
-                           SET fouls = fouls + 1
-                           WHERE id=:ab_id
-                           """)
+                sql = text(ab_helpers.foul(True))
             else:
-                sql = text("""UPDATE at_bats
-                           SET strikes = strikes + 1
-                           WHERE id=:ab_id
-                           """)
-        elif result == "Ball":
+                sql = text(ab_helpers.foul())
+
+        elif result == "Ball" or result == "Intentional Walk":
             if balls(ab_id) == 3:
-                if len(runners) > 0:
-                    if runners[0][1] == 1:
-                        runners[0][1] += 1
-                        if len(runners) > 1:
-                            if runners[1][1] == 2:
-                                runners[1][1] += 1
-                                if len(runners) > 2:
-                                    if runners[2][1] == 3:
-                                        runners[2][1] += 1
-                                        runs += 1
-                games.add_runner(ab_id, game_id, 1)
-                games.update_runners(game_id, runners)
-                sql = text("""UPDATE at_bats
-                       SET balls = balls + 1, result = 'BB'
-                       WHERE id=:ab_id
-                       """)
+                sql, runs = ab_helpers.ball(result, runners, 0, ab_id, game_id, True)
             else:
-                sql = text("""UPDATE at_bats
-                       SET balls = balls + 1
-                       WHERE id=:ab_id
-                       """)
-        elif result == "Intentional Walk":
-            if len(runners) > 0:
-                    if runners[0][1] == 1:
-                        runners[0][1] += 1
-                        if len(runners) > 1:
-                            if runners[1][1] == 2:
-                                runners[1][1] += 1
-                                if len(runners) > 2:
-                                    if runners[2][1] == 3:
-                                        runners[2][1] += 1
-                                        runs += 1
-            games.add_runner(ab_id, game_id, 1)
-            games.update_runners(game_id, runners)
-            sql = text("""UPDATE at_bats
-                    SET result = 'IBB'
-                    WHERE id=:ab_id
-                    """)
+                sql, runs = ab_helpers.ball(result, runners, 0, ab_id, game_id, False)
+
         elif result == "Single":
             games.add_runner(ab_id, game_id, 1)
             games.update_runners(game_id, runners)
