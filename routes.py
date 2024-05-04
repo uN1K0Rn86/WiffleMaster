@@ -1,11 +1,12 @@
-from app import app
 from flask import render_template, request, redirect, url_for, session, abort
+from app import app
 import users
 import players
 import teams
 import leagues
 import games
 import at_bats
+import routes_helpers
 
 @app.before_request
 def csrf_protect():
@@ -295,16 +296,9 @@ def go_games():
 @app.route("/games/<int:id>", methods=["GET", "POST"])
 def game_page(id):
     """Return the page for the game in question and handle game events."""
-    h_team = games.home_team(id)
-    a_team = games.away_team(id)
-
-    h_order = games.get_h_order(id)
-    h_order = [players.player_name(player) for player in h_order]
-    h_pitcher = players.player_name(games.get_h_pitcher(id))
-
-    a_order = games.get_a_order(id)
-    a_order = [players.player_name(player) for player in a_order]
-    a_pitcher = players.player_name(games.get_a_pitcher(id))
+    h_team = routes_helpers.h_team(id)
+    a_team = routes_helpers.a_team(id)
+    current = routes_helpers.update_current_players(id, h_team, a_team)
 
     inning = games.current_inning(id)
     total_innings = games.total_innings(id)
@@ -321,72 +315,12 @@ def game_page(id):
     in_progress = games.in_progress(id)
     
     if request.method == "GET":
-        # This if block is for the top of the inning; the away team is batting and the home team is pitching.
-        if inning % 2 == 1:
-            # This makes sure the correct batter is retrieved.
-            if in_progress:
-                if at_bats.current_ab_id(id) is None:
-                    last = games.get_a_previous(id)
-                    if last >= len(a_order) - 2:
-                        games.set_a_previous(id, -1)
-                    else:
-                        games.set_a_previous(id, last+1)
-
-            previous = games.get_a_previous(id)
-            batter = games.batter_up(a_order, previous) # The current batter.
-            batter_stats = games.batting_stats(id, batter[0])
-            on_deck = games.batter_up(a_order, previous+1) # The next batter.
-            on_deck_stats = games.batting_stats(id, on_deck[0])
-            pitcher = h_pitcher # The current pitcher.
-            p_players = teams.list_players(h_team[0]) # List of players available for a pitcher change.
-
-            # This creates an at bat.
-            if in_progress:
-                if at_bats.current_ab_id(id) is None:
-                    at_bats.create_at_bat(id, batter[0], pitcher[0], h_team[0], a_team[0])
-            ab_id = at_bats.current_ab_id(id)
-            if in_progress:
-                count = (at_bats.balls(ab_id), at_bats.strikes(ab_id))
-            else:
-                count = (0, 0)
-            pitch_count = games.pitch_count(id, h_pitcher[0])
-
-        # This block is for the bottom of the inning i.e. the home team is batting and the away team is pitching.  
-        else:
-            # This makes sure the correct batter is retrieved.
-            if in_progress:
-                if at_bats.current_ab_id(id) is None:
-                    last = games.get_h_previous(id)
-                    if last >= len(h_order) - 2:
-                        games.set_h_previous(id, -1)
-                    else:
-                        games.set_h_previous(id, last+1)
-
-            previous = games.get_h_previous(id)
-            batter = games.batter_up(h_order, previous) # The current batter.
-            batter_stats = games.batting_stats(id, batter[0])
-            on_deck = games.batter_up(h_order, previous+1) # The next batter.
-            on_deck_stats = games.batting_stats(id, on_deck[0])
-            pitcher = a_pitcher # The current pitcher.
-            p_players = teams.list_players(a_team[0]) # List of players available for a pitcher change.
-
-            # This creates an at bat.
-            if in_progress:
-                if at_bats.current_ab_id(id) is None:
-                    at_bats.create_at_bat(id, batter[0], pitcher[0], a_team[0], h_team[0])
-            ab_id = at_bats.current_ab_id(id)
-            if in_progress:
-                count = (at_bats.balls(ab_id), at_bats.strikes(ab_id))
-            else:
-                count = (0, 0)
-            pitch_count = games.pitch_count(id, a_pitcher.id)
-
-        return render_template("game.html", id=id, pitcher=pitcher, runs_inning=runs_inning,
-                               h_team=h_team, a_team=a_team, total_innings=total_innings,
-                               inning=inning, batter=batter, on_deck=on_deck, runs_home=runs_home,
-                               runs_away=runs_away, p_players=p_players, batter_stats=batter_stats,
-                               on_deck_stats=on_deck_stats, pitch_results=pitch_results,
-                               runners=runners, outs=outs, count=count, pitch_count=pitch_count,
+        return render_template("game.html", id=id, pitcher=current["pitcher"], runs_inning=runs_inning,
+                               h_team=h_team["id"], a_team=a_team["id"], total_innings=total_innings,
+                               inning=inning, batter=current["batter"], on_deck=current["on_deck"], runs_home=runs_home,
+                               runs_away=runs_away, p_players=current["p_players"], batter_stats=current["batter_stats"],
+                               on_deck_stats=current["on_deck_stats"], pitch_results=pitch_results,
+                               runners=runners, outs=outs, count=current["count"], pitch_count=current["pitch_count"],
                                in_progress=in_progress, hits_home=hits_home, hits_away=hits_away)
     
     if request.method == "POST":

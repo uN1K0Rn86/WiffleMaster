@@ -202,42 +202,34 @@ def batter_up(order, previous):
     else:
         return order[0]
     
-def get_h_previous(game_id):
+def get_previous(game_id):
     """Return the index of the previous batter for the home team.
        This is used to determine the current batter."""
-    sql = text("""SELECT h_previous
+    inning = current_inning(game_id)
+    if inning % 2 == 1:
+        sql = text("""SELECT a_previous
+               FROM games
+               WHERE id=:game_id
+               """)
+    else:
+        sql = text("""SELECT h_previous
                FROM games
                WHERE id=:game_id
                """)
     return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
 
-def set_h_previous(game_id, previous):
+def set_previous(game_id, previous):
     """Set the index (in the batting order) of the previous batter."""
+    inning = current_inning(game_id)
     try:
-        sql = text("""UPDATE games
-                SET h_previous=:previous
+        if inning % 2 == 1:
+            sql = text("""UPDATE games
+                SET a_previous=:previous
                 WHERE id=:game_id
                 """)
-        db.session.execute(sql, {"previous":previous, "game_id":game_id})
-        db.session.commit()
-    except:
-        return False
-    return True
-
-def get_a_previous(game_id):
-    """Return the index of the previous batter for the away team.
-       This is used to determine the current batter."""
-    sql = text("""SELECT a_previous
-               FROM games
-               WHERE id=:game_id
-               """)
-    return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
-
-def set_a_previous(game_id, previous):
-    """Set the index (in the batting order) of the previous batter."""
-    try:
-        sql = text("""UPDATE games
-                SET a_previous=:previous
+        else:
+            sql = text("""UPDATE games
+                SET h_previous=:previous
                 WHERE id=:game_id
                 """)
         db.session.execute(sql, {"previous":previous, "game_id":game_id})
