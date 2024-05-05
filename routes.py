@@ -188,11 +188,13 @@ def league_page(id):
     league_teams = leagues.show_teams(id)
     others = leagues.show_other_teams(id)
     table = leagues.league_table(id)
+
     if table:
         first_wins = table[0].wins
         first_losses = table[0].losses
     else:
         first_wins = first_losses = 0
+        
     batting_values = players.batting_values()
     pitching_values = players.pitching_values()
 

@@ -3,15 +3,15 @@ A webapp for keeping score, analyzing statistics, and managing players, teams, a
 
 The goal of this project is to create an application where users can create and manage their own leagues, teams, and players. The app will be created using python and the flask webapp library, and the database will be managed using postgreSQL.
 
-The goal is for each pitch to be logged into the database separately, so that the app produces detailed statistics for analytic purposes. Each at bat will have identifiers for the pitcher, batter, game, teams, and league in question so that data can be filtered and sorted.
+Each pitch can be logged into the database separately, so that the app produces detailed statistics for analytic purposes. Each at bat has have identifiers for the pitcher, batter, game, teams, and league in question so that data can be filtered and sorted.
 
 This project will be used in the University of Helsinki course regarding databases and web development. The scope of the project is ambitious in relation to the requirements of the course, but the project is one I want to complete regardless, so I see this as a good opportunity to combine education with my own interests.
 
-Currently, it is possible to register and log in as a user and create players, teams, and leagues. Players can be assigned to teams and moved from one team to another. A player can only be on one team at a time. Teams can be assigned to leagues, and can participate in several different leagues.
+It is possible to register and log in as a user and create players, teams, and leagues. Players can be assigned to teams and moved from one team to another. A player can only be on one team at a time. Teams can be assigned to leagues, and can participate in several different leagues.
 
-Games can now be logged and recorded into the database. The process is fully functional, and works according to the rules of wiffleball as intended. Note that this differs from baseball rules in some ways. For example, fielding errors and base stealing are not included. The user can decide how many innings are in a game, and what league (if any) the game is a part of.
+Games can be logged and recorded into the database. The process is fully functional, and works according to the rules of wiffleball as intended. Note that this differs from baseball rules in some ways. For example, fielding errors and base stealing are not included. The user can decide how many innings are in a game, and what league (if any) the game is a part of.
 
-The app now records everything into the database as is intended. The next step is to give users access to statistics based on the recorded data. For now, team pages show batting statistics for their players. The intention is to add pitching statistics to that, and make player pages show similar, but more detailed information. Additionally, league pages will display a standings table and statistics for league leaders. Also, a player search feature will be added. 
+The app now records everything into the database as is intended. Users can access statistics from the games on the teams and leagues pages. Additionally, league pages show a standings table and statistics for league leaders.
 
 Installation instructions:
 
