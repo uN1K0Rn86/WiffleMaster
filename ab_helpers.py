@@ -50,8 +50,8 @@ def ball(result, runners, ab_id, game_id, three=False):
 
         games.add_runner(ab_id, game_id, 1)
         games.update_runners(game_id, runners)
-        sql = text(f"""UPDATE at_bats
-                SET balls = balls + 1, result = {result}
+        sql = text("""UPDATE at_bats
+                SET balls = balls + 1, result = :result
                 WHERE id=:ab_id
                 """)
     
@@ -61,7 +61,7 @@ def ball(result, runners, ab_id, game_id, three=False):
                     WHERE id=:ab_id
                     """)
         
-    return sql
+    return sql, result
 
 def base_hit(result, ab_id, game_id, runners):
     """Handle the result for a base hit"""

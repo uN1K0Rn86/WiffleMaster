@@ -79,9 +79,9 @@ def handle_pitch(result, ab_id, game_id, runners: list):
 
         elif result == "Ball" or result == "Intentional Walk":
             if balls(ab_id) == 3 or result == "Intentional Walk":
-                sql = ab_helpers.ball(result, runners, ab_id, game_id, True)
+                sql, result = ab_helpers.ball(result, runners, ab_id, game_id, True)
             else:
-                sql = ab_helpers.ball(result, runners, ab_id, game_id, False)
+                sql, result = ab_helpers.ball(result, runners, ab_id, game_id, False)
 
         elif result == "Single" or result == "Double" or result == "Triple" or result == "Home Run":
             sql = ab_helpers.base_hit(result, ab_id, game_id, runners)
