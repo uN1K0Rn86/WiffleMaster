@@ -8,7 +8,7 @@ def pitch_results():
     return ["Strike (looking)", "Strike (swinging)", "Foul", "Ball", "Intentional Walk", "Single", "Double", "Triple", "Home Run",
             "Groundout", "Flyout", "Lineout", "Fielder's choice", "Sac fly", "Sac bunt"]
 
-def create_at_bat(game_id, batter_id, pitcher_id, p_team_id, b_team_id):
+def create_at_bat(game_id, batter_id, pitcher_id, b_team_id, p_team_id):
     """Create a new at bat."""
     outs = games.get_outs(game_id)
     inning = games.current_inning(game_id)

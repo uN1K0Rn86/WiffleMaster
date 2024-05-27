@@ -310,6 +310,8 @@ def game_page(id):
     runs_away = games.runs_away(id)
     hits_home = games.hits_home(id)
     hits_away = games.hits_away(id)
+    print(hits_home)
+    print(hits_away)
 
     pitch_results = at_bats.pitch_results()
     runners = games.get_runners(id)

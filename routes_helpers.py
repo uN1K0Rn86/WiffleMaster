@@ -41,7 +41,7 @@ def update_current_players(game_id, h_team, a_team):
                     games.set_previous(game_id, -1)
                 else:
                     games.set_previous(game_id, last+1)
-        
+
         previous = games.get_previous(game_id)
         current["batter"] = games.batter_up(a_team["order"], previous) # The current batter.
         current["on_deck"] = games.batter_up(a_team["order"], previous+1) # The next batter.
