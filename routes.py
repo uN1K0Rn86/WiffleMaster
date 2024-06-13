@@ -275,6 +275,7 @@ def go_games():
         h_team_id = int(request.form["h_team"])
         league_id = int(request.form["league"])
         innings = int(request.form["innings"])
+        max_runs = int(request.form["max_runs"])
         error_message = None
 
         if len(teams.list_players(a_team_id)) < 2:
@@ -289,10 +290,10 @@ def go_games():
         if error_message:
             return render_template("games.html", all_teams=all_teams, all_leagues=all_leagues, in_progress=in_progress,
                                    latest=latest, a_team_id=a_team_id, h_team_id=h_team_id, league_id=league_id, innings=innings,
-                                   error_message=error_message)
+                                   max_runs=max_runs, error_message=error_message)
         
         else:
-            game_id = games.new_game(innings, a_team_id, h_team_id, league_id)
+            game_id = games.new_game(innings, a_team_id, h_team_id, league_id, max_runs)
             return redirect(url_for("go_order", game_id=game_id))
 
 @app.route("/games/<int:id>", methods=["GET", "POST"])
@@ -304,14 +305,23 @@ def game_page(id):
 
     inning = games.current_inning(id)
     total_innings = games.total_innings(id)
-    runs_inning = [games.runs_inning(id, i) for i in range(1, inning + 1)]
+
+    max_runs = games.get_max_runs_inning(id, inning)
+    runs_inning = []
+    for i in range(1, inning + 1):
+        away, home = games.runs_before_inning(id, i)
+        if i % 2 == 1:
+            if home - away > max_runs:
+                max_runs = home - away
+        else:
+            if away - home > max_runs:
+                max_runs = away - home
+        runs_inning.append(min(games.runs_inning(id, i), max_runs))
 
     runs_home = games.runs_home(id)
     runs_away = games.runs_away(id)
     hits_home = games.hits_home(id)
     hits_away = games.hits_away(id)
-    print(hits_home)
-    print(hits_away)
 
     pitch_results = at_bats.pitch_results()
     runners = games.get_runners(id)
@@ -352,8 +362,15 @@ def game_page(id):
             if "runner3" in request.form:
                 runner3 = games.parse_option(request.form["runner3"])
                 runners.append(runner3)
-            ab_id = at_bats.current_ab_id(id)
+            if at_bats.current_ab_id(id) is None:
+                ab_id = at_bats.current_ab_id(id)
+            else:
+                ab_id = at_bats.last_ab_id(id)
             at_bats.handle_pitch(result, ab_id, id, runners)
+
+        elif "end_inning" in request.form:
+            games.end_inning(id)
+        
         return redirect(url_for("game_page", id=id))
 
 @app.route("/games/order/<game_id>", methods=["GET", "POST"])

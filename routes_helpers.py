@@ -73,7 +73,9 @@ def update_current_players(game_id, h_team, a_team):
     if in_progress:
         if at_bats.current_ab_id(game_id) is None:
             at_bats.create_at_bat(game_id, current["batter"][0], current["pitcher"][0], current["batting_team"], current["pitching team"])
-    ab_id = at_bats.current_ab_id(game_id)
+            ab_id = at_bats.current_ab_id(game_id)
+        else:
+            ab_id = at_bats.last_ab_id(game_id)
     if in_progress:
         current["count"] = (at_bats.balls(ab_id), at_bats.strikes(ab_id))
     else:

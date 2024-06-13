@@ -207,3 +207,8 @@ form #login-button:hover{
  td {
     padding: 0 2em;
  }
+
+ .center-align {
+    display: flex;
+    justify-content: center;
+ }

@@ -61,6 +61,16 @@
 <br>
 
 {% if in_progress %}
+    <div class="center-align">
+        <form action="/games/{{ id }}" method="POST">
+            <input type="hidden" name="end_inning">
+            <input id="button" type="submit" value="End Inning">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        </form>
+    </div>
+{% endif %}
+
+{% if in_progress %}
 <fieldset class="game">
     <div class="fieldset-item">
         {{ outs }}

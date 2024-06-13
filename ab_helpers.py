@@ -49,6 +49,7 @@ def ball(result, runners, ab_id, game_id, three=False):
                             runners[2][1] += 1
 
         games.add_runner(ab_id, game_id, 1)
+        prev_runs = games.runs_inning(game_id, games.current_inning(game_id))
         games.update_runners(game_id, runners)
         sql = text("""UPDATE at_bats
                 SET balls = balls + 1, result = :result
@@ -61,7 +62,7 @@ def ball(result, runners, ab_id, game_id, three=False):
                     WHERE id=:ab_id
                     """)
         
-    return sql, result
+    return sql, result, prev_runs
 
 def base_hit(result, ab_id, game_id, runners):
     """Handle the result for a base hit"""
@@ -78,23 +79,23 @@ def base_hit(result, ab_id, game_id, runners):
     elif result == "Single":
         base = 1
 
+    prev_runs = games.runs_inning(game_id, games.current_inning(game_id))
     games.add_runner(ab_id, game_id, base)
     games.update_runners(game_id, runners)
-    if runs == 1:
-        at_bats.rbi(ab_id, 1)
-        games.add_runs(game_id, 1)
 
     sql = text("""UPDATE at_bats
                 SET result=:result, strikes = strikes + 1
                 WHERE id=:ab_id
                 """)
     
-    return sql
+    return sql, runners, prev_runs, runs
 
 def fielders_choice(ab_id, game_id, runners):
     """Handle the result for fielder's choice."""
     if len(runners) == 1 and runners[0][1] != 0:
         runners[0][1] = 0
+    
+    prev_runs = games.runs_inning(game_id, games.current_inning(game_id))
     games.add_runner(ab_id, game_id, 1)
     games.update_runners(game_id, runners)
     sql = text("""UPDATE at_bats
@@ -102,11 +103,12 @@ def fielders_choice(ab_id, game_id, runners):
                 WHERE id=:ab_id
                 """)
     
-    return sql
+    return sql, prev_runs
 
 def sac(game_id, runners, outs):
     """Handle the result for a sac fly or sac bunt."""
     outs = outs
+    prev_runs = games.runs_inning(game_id, games.current_inning(game_id))
     games.update_runners(game_id, runners)
     sql = text("""UPDATE at_bats
                 SET result=:result, strikes = strikes + 1
@@ -114,11 +116,12 @@ def sac(game_id, runners, outs):
                 """)
     outs += 1
 
-    return sql, outs
+    return sql, outs, prev_runs
 
 def out(game_id, runners, outs):
     """Handle the result for an out on a ball in play."""
     outs = outs
+    prev_runs = games.runs_inning(game_id, games.current_inning(game_id))
     games.update_runners(game_id, runners)
     sql = text("""UPDATE at_bats
                 SET result=:result, strikes = strikes + 1
@@ -126,4 +129,4 @@ def out(game_id, runners, outs):
                 """)
     outs += 1
 
-    return sql, outs
+    return sql, outs, prev_runs

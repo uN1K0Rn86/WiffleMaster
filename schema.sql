@@ -45,7 +45,8 @@ CREATE TABLE games (id SERIAL PRIMARY KEY,
                     h_pitcher INTEGER REFERENCES players,
                     a_pitcher INTEGER REFERENCES players,
                     h_previous INTEGER DEFAULT -2,
-                    a_previous INTEGER DEFAULT -2);
+                    a_previous INTEGER DEFAULT -2,
+                    max_runs INTEGER DEFAULT 5);
 
 CREATE TABLE at_bats (id SERIAL PRIMARY KEY,
                       batter_id INTEGER REFERENCES players,
@@ -67,3 +68,7 @@ CREATE TABLE runners (id SERIAL PRIMARY KEY,
                       pitcher_id INTEGER REFERENCES players,
                       game_id INTEGER REFERENCES games,
                       status INTEGER);
+
+CREATE TABLE max_runs (game_id INTEGER REFERENCES games,
+                       inning INTEGER,
+                       runs INTEGER);

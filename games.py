@@ -2,16 +2,17 @@ from sqlalchemy.sql import text
 from db import db
 import at_bats
 
-def new_game(innings, a_team_id, h_team_id, league_id):
+def new_game(innings, a_team_id, h_team_id, league_id, max_runs):
     """Add a game into the database."""
     try:
-        sql = text("""INSERT INTO games (innings, a_team_id, h_team_id, a_team_runs, h_team_runs, league_id, in_progress, inning, game_time)
-            VALUES (:innings, :a_team_id, :h_team_id, 0, 0, :league_id, TRUE, 1, NOW())
+        sql = text("""INSERT INTO games (innings, a_team_id, h_team_id, a_team_runs, h_team_runs, league_id, in_progress, inning, game_time, max_runs)
+            VALUES (:innings, :a_team_id, :h_team_id, 0, 0, :league_id, TRUE, 1, NOW(), :max_runs)
             RETURNING id""")
-        id = db.session.execute(sql, {"innings":innings, "a_team_id":a_team_id, "h_team_id":h_team_id, "league_id":league_id}).fetchone()[0]
+        id = db.session.execute(sql, {"innings":innings, "a_team_id":a_team_id, "h_team_id":h_team_id, "league_id":league_id, "max_runs":max_runs}).fetchone()[0]
         db.session.commit()
     except:
         return False
+    set_max_runs_inning(id, 1)
     return id
 
 def in_progress(game_id):
@@ -146,14 +147,70 @@ def current_inning(id):
                WHERE id=:id""")
     return db.session.execute(sql, {"id":id}).fetchone()[0]
 
+def set_max_runs_inning(game_id, inning):
+    """Set the maximum amount of runs a team can score in the inning."""
+    sql = text("""SELECT max_runs
+               FROM games
+               WHERE id=:game_id
+               """)
+    max_runs = db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
+    away, home = runs_before_inning(game_id, inning)
+    if inning % 2 == 1:
+        if home - away > max_runs:
+            max_runs = home - away
+    else:
+        if away - home > max_runs:
+            max_runs = away - home
+    sql2 = text("""INSERT INTO max_runs (game_id, inning, runs)
+                    VALUES (:game_id, :inning, :max_runs)
+                """)
+    try:
+        db.session.execute(sql2, {"game_id":game_id, "inning":inning, "max_runs":max_runs})
+        db.session.commit()
+    except:
+        return False
+    return True
+
+def get_max_runs_inning(game_id, inning):
+    """Return the maximum amount of runs a team can score in an inning."""
+    sql = text("""SELECT runs
+                    FROM max_runs
+                    WHERE game_id=:game_id
+                    AND inning=:inning
+                    """)
+    return db.session.execute(sql, {"game_id":game_id, "inning":inning}).fetchone()[0]
+
 def runs_inning(game_id, inning):
     """Return the amount of runs scored in a given inning in a given game."""
-    sql = text("""SELECT COALESCE(SUM(rbi), 0)
-                FROM at_bats
+    sql = text("""SELECT COUNT(*)
+                FROM runners
                 WHERE game_id=:game_id
                 AND inning=:inning
+                AND status=4
                 """)
-    return db.session.execute(sql, {"game_id":game_id, "inning":inning}).fetchone()[0]
+    runs = db.session.execute(sql, {"game_id":game_id, "inning":inning}).fetchone()[0]
+    return min(runs, get_max_runs_inning(game_id, inning))
+
+def runs_before_inning(game_id, inning):
+    away = 0
+    home = 0
+
+    for i in range(1, inning, 2):
+        sql = text("""SELECT COUNT(*)
+                        FROM runners
+                        WHERE game_id = :game_id
+                        AND inning = :i
+                   """)
+        away += min(db.session.execute(sql, {"game_id":game_id, "i":i}).fetchone()[0], get_max_runs_inning(game_id, i))
+
+    for i in range(2, inning, 2):
+        sql = text("""SELECT COUNT(*)
+                        FROM runners
+                        WHERE game_id = :game_id
+                        AND inning = :i
+                   """)
+        home += min(db.session.execute(sql, {"game_id":game_id, "i":i}).fetchone()[0], get_max_runs_inning(game_id, i))
+    return away, home
 
 def runs_home(id):
     """Return the total amount of runs scored by the home team in a given game."""
@@ -178,7 +235,7 @@ def hits_home(game_id):
                JOIN GAMES G
                ON A.game_id=G.id
                AND A.b_team_id=G.h_team_id
-               AND A.result IN ('Single', 'Double', 'Triple', 'Home Run')
+               AND A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single +o', 'Double +o', 'Triple +o')
                AND A.game_id=:game_id
                """)
     return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
@@ -308,6 +365,7 @@ def add_out(game_id):
                     SET outs = 0, inning = inning + 1
                     WHERE id=:game_id
                     """)
+            set_max_runs_inning(game_id, inning + 1)
         elif get_outs(game_id) == 2 and inning >= total and inning % 2 == 0 and runs_away(game_id) != runs_home(game_id):
             lob(game_id)
             sql = text("""UPDATE games
@@ -320,6 +378,7 @@ def add_out(game_id):
                        """)
         db.session.execute(sql, {"game_id":game_id})
         db.session.commit()
+
         if get_outs(game_id) == 0 and inning >= total and runs_home(game_id) > runs_away(game_id):
             finish_game(game_id)
         if get_outs(game_id) == 3:
@@ -351,15 +410,16 @@ def parse_option(value):
 def add_runner(ab_id, game_id, status):
     """Add a new runner."""
     runner_id = at_bats.current_batter(ab_id)
-    if current_inning(game_id) % 2 == 1:
+    inning = current_inning(game_id)
+    if inning % 2 == 1:
         pitcher_id = get_h_pitcher(game_id)
     else:
         pitcher_id = get_a_pitcher(game_id)
     try:
-        sql = text("""INSERT INTO runners (runner_id, pitcher_id, game_id, status)
-                VALUES (:runner_id, :pitcher_id, :game_id, :status)
+        sql = text("""INSERT INTO runners (runner_id, pitcher_id, game_id, status, inning)
+                VALUES (:runner_id, :pitcher_id, :game_id, :status, :inning)
                 """)
-        db.session.execute(sql, {"runner_id":runner_id, "pitcher_id":pitcher_id, "game_id":game_id, "status":status})
+        db.session.execute(sql, {"runner_id":runner_id, "pitcher_id":pitcher_id, "game_id":game_id, "status":status, "inning":inning})
         db.session.commit()
     except:
         return False
@@ -396,12 +456,25 @@ def lob(game_id):
         return False
     return True
 
-    
-
-def add_runs(game_id, runs):
+def add_runs(game_id, runs, ab_id, prev_runs):
     """Add scored runs."""
+    print(runs)
+    print(prev_runs)
+    inning = current_inning(game_id)
+    max_runs = get_max_runs_inning(game_id, inning)
+    away, home = runs_before_inning(game_id, inning)
+    if inning % 2 == 1:
+        if home - away > max_runs:
+            max_runs = home - away
+    else:
+        if away - home > max_runs:
+            max_runs = away - home
+    print(max_runs)
+    if prev_runs + runs >= max_runs:
+        runs = max_runs - prev_runs
+    print(runs)
     try:
-        if current_inning(game_id) % 2 == 1:
+        if inning % 2 == 1:
             sql = text("""UPDATE games
                     SET a_team_runs = a_team_runs + :runs
                     WHERE id=:game_id
@@ -415,6 +488,22 @@ def add_runs(game_id, runs):
         db.session.commit()
     except:
         return False
+    return True
+
+def end_inning(game_id):
+    """Progress to the next inning."""
+    try:
+        sql = text("""UPDATE games
+                   SET inning = inning + 1, outs = 0
+                   WHERE id=:game_id
+                   """)
+        db.session.execute(sql, {"game_id":game_id})
+        db.session.commit()
+    except:
+        return False
+    lob(game_id)
+    inning = current_inning(game_id)
+    set_max_runs_inning(game_id, inning)
     return True
 
 def finish_game(game_id):
