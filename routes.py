@@ -322,6 +322,7 @@ def game_page(id):
     runs_away = games.runs_away(id)
     hits_home = games.hits_home(id)
     hits_away = games.hits_away(id)
+    box_away, box_home = games.box_scores(id)
 
     pitch_results = at_bats.pitch_results()
     runners = games.get_runners(id)
@@ -335,7 +336,8 @@ def game_page(id):
                                runs_away=runs_away, p_players=current["p_players"], batter_stats=current["batter_stats"],
                                on_deck_stats=current["on_deck_stats"], pitch_results=pitch_results,
                                runners=runners, outs=outs, count=current["count"], pitch_count=current["pitch_count"],
-                               in_progress=in_progress, hits_home=hits_home, hits_away=hits_away)
+                               in_progress=in_progress, hits_home=hits_home, hits_away=hits_away, box_away=box_away,
+                               box_home=box_home)
     
     if request.method == "POST":
         # This handles the form if the pitcher is changed.

@@ -90,6 +90,22 @@ def league_table(league_id):
                """)
     return db.session.execute(sql, {"league_id":league_id}).fetchall()
 
+def batting_average(league_id, player_id):
+    """Return the batting average for a player in a given league."""
+    sql = text("""SELECT
+                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END) :: FLOAT /
+                        (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)), 0) AS avg
+                    FROM players P
+                    LEFT JOIN at_bats A ON A.batter_id = P.id
+                    AND P.id = :player_id
+                    JOIN games G ON A.game_id = G.id
+                    JOIN leagues L ON G.league_id = L.id
+                    AND L.id = :league_id
+               """)
+    return db.session.execute(sql, {"player_id":player_id, "league_id":league_id}).fetchone()[0]
+
 def batting_leaders(league_id, amount, offset, sort, asc=False):
     """Return batting statistics for players in this league."""
     direction = "ASC" if asc else "DESC"
@@ -164,13 +180,13 @@ def pitching_leaders(league_id, amount, offset, sort, asc=False):
                     COUNT(DISTINCT A.game_id) AS g,
                     {outs} AS outs,
                     {k} AS k,
-                    ({k}) ::FLOAT / (({outs}) ::FLOAT / 27) AS k9,
+                    CASE WHEN {outs} = 0 THEN 0 ELSE ({k}) ::FLOAT / (({outs}) ::FLOAT / 27) END AS k9,
                     {bb} AS bb,
-                    ({bb}) ::FLOAT / (({outs}) ::FLOAT / 27) AS bb9,
+                    CASE WHEN {outs} = 0 THEN 0 ELSE ({bb}) ::FLOAT / (({outs}) ::FLOAT / 27) END AS bb9,
                     {hits} AS hits,
-                    ({hits}) ::FLOAT / (({hits}) + ({outs}) ::FLOAT) AS baa,
+                    CASE WHEN {outs} = 0 THEN 0 ELSE ({hits}) ::FLOAT / (({hits}) + ({outs}) ::FLOAT) END AS baa,
                     {r} AS r,
-                    ({r}) ::FLOAT / (({outs}) ::FLOAT / 27) AS era
+                    CASE WHEN {outs} = 0 THEN 0 ELSE ({r}) ::FLOAT / (({outs}) ::FLOAT / 27) END AS era
                 FROM players P
                 LEFT JOIN at_bats A ON A.pitcher_id = P.id
                 JOIN games G ON A.game_id = G.id

@@ -1,6 +1,7 @@
 from sqlalchemy.sql import text
 from db import db
 import at_bats
+import leagues
 
 def new_game(innings, a_team_id, h_team_id, league_id, max_runs):
     """Add a game into the database."""
@@ -20,6 +21,14 @@ def in_progress(game_id):
     sql = text("""SELECT in_progress
                FROM games
                WHERE id=:game_id
+               """)
+    return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
+
+def get_league_id(game_id):
+    """Return the league id of the game in question."""
+    sql = text("""SELECT league_id
+                    FROM games
+                    WHERE id=:game_id
                """)
     return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
 
@@ -133,6 +142,28 @@ def home_team(id):
             AND G.h_team_id=T.id""")
     return db.session.execute(sql, {"id":id}).fetchone()
 
+def box_scores(game_id):
+    """Return statistics for box scores to display on the game page."""
+    a_order = get_a_order(game_id)
+    h_order = get_h_order(game_id)
+    away = []
+    home = []
+    league_id = get_league_id(game_id)
+
+    for player_id in a_order:
+        stats = batting_stats(game_id, player_id)
+        if league_id:
+            stats.append(leagues.batting_average(league_id, player_id))
+        away.append(stats)
+
+    for player_id in h_order:
+        stats = batting_stats(game_id, player_id)
+        if league_id:
+            stats.append(leagues.batting_average(league_id, player_id))
+        home.append(stats)
+        
+    return away, home
+
 def total_innings(id):
     """Return the total number of innings for a given game."""
     sql = text("""SELECT innings
@@ -200,6 +231,7 @@ def runs_before_inning(game_id, inning):
                         FROM runners
                         WHERE game_id = :game_id
                         AND inning = :i
+                        AND status = 4
                    """)
         away += min(db.session.execute(sql, {"game_id":game_id, "i":i}).fetchone()[0], get_max_runs_inning(game_id, i))
 
@@ -208,6 +240,7 @@ def runs_before_inning(game_id, inning):
                         FROM runners
                         WHERE game_id = :game_id
                         AND inning = :i
+                        AND status = 4
                    """)
         home += min(db.session.execute(sql, {"game_id":game_id, "i":i}).fetchone()[0], get_max_runs_inning(game_id, i))
     return away, home
@@ -298,14 +331,17 @@ def set_previous(game_id, previous):
 def batting_stats(game_id, player_id):
     """Return batting stats for a player in a given game."""
     sql = text("""SELECT 
-                COALESCE(SUM(CASE WHEN result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS hits,
-                COALESCE(SUM(CASE WHEN game_id=:game_id AND result NOT IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS abs
-                FROM at_bats
-                WHERE batter_id=:player_id
-                AND game_id=:game_id
-                AND result IS NOT NULL
+                P.name AS name,
+                COALESCE(SUM(CASE WHEN A.game_id=:game_id AND result NOT IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS abs,
+                COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS hits,
+                COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END), 0) AS hr,
+                SUM(A.rbi) AS rbi
+                FROM players P LEFT JOIN at_bats A
+                ON A.batter_id=P.id AND A.game_id=:game_id AND result IS NOT NULL
+                WHERE P.id=:player_id
+                GROUP BY P.name
                """)
-    return db.session.execute(sql, {"player_id":player_id, "game_id":game_id}).fetchone()
+    return db.session.execute(sql, {"player_id":player_id, "game_id":game_id}).fetchall()
 
 def change_h_pitcher(game_id, player_id):
     """Change the home team's pitcher in a given game."""
@@ -458,8 +494,6 @@ def lob(game_id):
 
 def add_runs(game_id, runs, ab_id, prev_runs):
     """Add scored runs."""
-    print(runs)
-    print(prev_runs)
     inning = current_inning(game_id)
     max_runs = get_max_runs_inning(game_id, inning)
     away, home = runs_before_inning(game_id, inning)
@@ -469,10 +503,8 @@ def add_runs(game_id, runs, ab_id, prev_runs):
     else:
         if away - home > max_runs:
             max_runs = away - home
-    print(max_runs)
     if prev_runs + runs >= max_runs:
         runs = max_runs - prev_runs
-    print(runs)
     try:
         if inning % 2 == 1:
             sql = text("""UPDATE games

@@ -92,7 +92,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
        to finish the game if the home team obtains a lead in the final inning."""
     outs = 0
     runs = 0
-
+    
     try:
         if result == "Strike (looking)":
             if strikes(ab_id) == 2:
@@ -147,7 +147,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
         if outs > 0:
             for i in range(outs):
                 games.add_out(game_id)
-
+        
         db.session.execute(sql, {"result":result, "ab_id":ab_id})
         db.session.commit()
         if games.current_inning(game_id) >= games.total_innings(game_id)*2 and games.runs_home(game_id) > games.runs_away(game_id):

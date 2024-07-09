@@ -34,6 +34,7 @@ def foul(two=False):
 
 def ball(result, runners, ab_id, game_id, three=False):
     """Handle the result for a ball or intentional walk."""
+    prev_runs = games.runs_inning(game_id, games.current_inning(game_id))
     if three or result == "Intentional Walk":
         if result == "Intentional Walk":
             result = "IBB"
@@ -49,7 +50,6 @@ def ball(result, runners, ab_id, game_id, three=False):
                             runners[2][1] += 1
 
         games.add_runner(ab_id, game_id, 1)
-        prev_runs = games.runs_inning(game_id, games.current_inning(game_id))
         games.update_runners(game_id, runners)
         sql = text("""UPDATE at_bats
                 SET balls = balls + 1, result = :result

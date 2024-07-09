@@ -132,15 +132,68 @@
         <b>Batter:</b> {{ batter[1] }}
     </div>
     <div class="fieldset-item">
-        Today: {{ batter_stats[0] }} for {{ batter_stats[1] }}
+        Today: {{ batter_stats[0][2] }} for {{ batter_stats[0][1] }}
     </div>
     <div class="fieldset-item">
         <b>On deck:</b> {{ on_deck[1] }}
     </div>
     <div class="fieldset-item">
-        Today: {{ on_deck_stats[0] }} for {{ on_deck_stats[1] }}
+        Today: {{ on_deck_stats[0][2] }} for {{ on_deck_stats[0][1] }}
     </div>
 </fieldset>
 {% endif %}
+
+<div class="boxscore-container">
+    <fieldset class="boxscore">
+        <legend><b>Away</b></legend>
+        <table class="score">
+            <tr>
+                <td></td>
+                <td><b>Name</b></td>
+                <td><b>AB</b></td>
+                <td><b>H</b></td>
+                <td><b>HR</b></td>
+                <td><b>RBI</b></td>
+                <td><b>AVG</b></td>
+            </tr>
+            {% for player in box_away %}
+                <tr>
+                    <td>{{ loop.index0 + 1 }}</td>
+                    <td>{{ player[0][0] }}</td>
+                    <td>{{ player[0][1] }}</td>
+                    <td>{{ player[0][2] }}</td>
+                    <td>{{ player[0][3] }}</td>
+                    <td>{{ player[0][4] }}</td>
+                    <td>{{ '%.3f' % player[1] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </fieldset>
+    <fieldset class="boxscore">
+        <legend><b>Home</b></legend>
+        <table class="score">
+            <tr>
+                <td></td>
+                <td><b>Name</b></td>
+                <td><b>AB</b></td>
+                <td><b>H</b></td>
+                <td><b>HR</b></td>
+                <td><b>RBI</b></td>
+                <td><b>AVG</b></td>
+            </tr>
+            {% for player in box_home %}
+                <tr>
+                    <td>{{ loop.index0 + 1 }}</td>
+                    <td>{{ player[0][0] }}</td>
+                    <td>{{ player[0][1] }}</td>
+                    <td>{{ player[0][2] }}</td>
+                    <td>{{ player[0][3] }}</td>
+                    <td>{{ player[0][4] }}</td>
+                    <td>{{ '%.3f' % player[1] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </fieldset>
+</div>
 
 {% endblock %}

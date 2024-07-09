@@ -130,6 +130,16 @@ fieldset.text {
     background-color: blanchedalmond;
 }
 
+.boxscore-container {
+    display: flex;
+    gap: 20px;
+}
+
+.boxscore {
+    flex: 1;
+    border: none;
+}
+
 .fieldset-item {
     grid-column: span 1;
     margin-right: 10px;
