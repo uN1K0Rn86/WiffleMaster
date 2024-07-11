@@ -34,6 +34,7 @@ def update_current_players(game_id, h_team, a_team):
     last = games.get_previous(game_id)
     current = {}
     removed = games.get_removed(game_id)
+    current["all_players"] = a_team["order"] + h_team["order"]
 
     if inning % 2 == 1:
         if in_progress:

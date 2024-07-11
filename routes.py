@@ -337,7 +337,7 @@ def game_page(id):
                                on_deck_stats=current["on_deck_stats"], pitch_results=pitch_results,
                                runners=runners, outs=outs, count=current["count"], pitch_count=current["pitch_count"],
                                in_progress=in_progress, hits_home=hits_home, hits_away=hits_away, box_away=box_away,
-                               box_home=box_home)
+                               box_home=box_home, all_players=current["all_players"])
     
     if request.method == "POST":
         # This handles the form if the pitcher is changed.
@@ -415,6 +415,10 @@ def game_page(id):
 
         elif "end_inning" in request.form:
             games.end_inning(id)
+
+        elif "remove" in request.form:
+            remove_id = request.form["remove"]
+            games.remove_player(id, remove_id)
         
         return redirect(url_for("game_page", id=id))
 

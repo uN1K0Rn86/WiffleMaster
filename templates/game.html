@@ -224,4 +224,19 @@
     </fieldset>
 </div>
 
+{% if in_progress %}
+<fieldset class="text">
+    <form action="/games/{{ id }}" method="POST">
+        <label for="remove">Remove player: </label>
+        <select name="remove">
+            {% for player in all_players %}
+                <option value="{{ player.id }}">{{ player.name }}</option>
+            {% endfor %}
+        </select>
+        <input id="login-button" type="submit" value="Remove">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    </form>
+</fieldset>
+{% endif %}
+
 {% endblock %}
