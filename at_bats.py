@@ -5,8 +5,7 @@ import ab_helpers
 
 def pitch_results():
     """Return a list of possible results for any pitch."""
-    return ["Strike (looking)", "Strike (swinging)", "Foul", "Ball", "Intentional Walk", "Single", "Double", "Triple", "Home Run",
-            "Groundout", "Flyout", "Lineout", "Fielder's choice", "Sac fly", "Sac bunt"]
+    return ["Intentional Walk", "Single", "Double", "Triple", "Home Run", "Groundout", "Flyout", "Lineout", "Fielder's choice", "Sac fly", "Sac bunt"]
 
 def create_at_bat(game_id, batter_id, pitcher_id, b_team_id, p_team_id):
     """Create a new at bat."""

@@ -81,36 +81,64 @@
         {% endif %}<br>
         {{ count[0] }} - {{ count[1] }}
     </div>
-    <form action="/games/{{ id }}" method="POST">
-        <label for="pitch"><b>Pitch result: </b></label>
-        <select name="pitch">
-            {% for result in pitch_results %}
-                <option value="{{ result }}">{{ result }}</option>
-            {% endfor %}
-        </select>
-        {% if runners|length > 0 %}<br><br>
-            If the batter walks or hits a home run, runners will be moved automatically.<br>
-            In case of a fielder's choice, make sure to mark which runner is out.<br><br>
+    <div class="pitch-form">
+        <b>Pitch result: </b>
+        <br>
+        <div class="pitch-form"></div>
+        <form action="/games/{{ id }}" method="POST">
+            <input type="hidden" name="sl">
+            <input id="pitch-button" type="submit" value="Strike (looking)">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        </form>
+        <form action="/games/{{ id }}" method="POST">
+            <input type="hidden" name="ss">
+            <input id="pitch-button" type="submit" value="Strike (swinging)">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        </form>
+        <form action="/games/{{ id }}" method="POST">
+            <input type="hidden" name="Foul">
+            <input id="pitch-button" type="submit" value="Foul ball">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        </form>
+        <form action="/games/{{ id }}" method="POST">
+            <input type="hidden" name="Ball">
             {% for runner in runners %}
-                <label for="runner{{ runner[1] }}"><b>Runner on {{ runner[1] }}: </b></label>
-                <select name="runner{{ runner[1] }}">
-                    <option value="({{ runner[0] }}_{{ runner[1] }})">Stayed</option>
-                    <option value="({{ runner[0] }}_0)">Out</option>
-                    {% if runner[1] == 1 %}
-                        <option value="({{ runner[0] }}_2)">2nd</option>
-                    {% endif %}
-                    {% if runner[1] == 1 or runner[1] == 2 %}
-                        <option value="({{ runner[0] }}_3)">3rd</option>
-                    {% endif %}
-                    <option value="({{ runner[0] }}_4)">Scored</option>
-                </select>
-                <br>
+                <input type="hidden" name="runner{{ runner[1] }}" value="({{ runner[0] }}_{{ runner[1] }})">
             {% endfor %}
-            <br>
-        {% endif %}
-        <input id="login-button" type="submit" value="Submit">
-        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-    </form>
+            <input id="pitch-button" type="submit" value="Ball">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        </form>
+        <form id="pitch-select" action="/games/{{ id }}" method="POST">
+            <select name="pitch">
+                {% for result in pitch_results %}
+                    <option value="{{ result }}">{{ result }}</option>
+                {% endfor %}
+            </select>
+            {% if runners|length > 0 %}<br><br>
+                If the batter walks or hits a home run, runners will be moved automatically.<br>
+                In case of a fielder's choice, make sure to mark which runner is out.<br><br>
+                {% for runner in runners %}
+                    <label for="runner{{ runner[1] }}"><b>Runner on {{ runner[1] }}: </b></label>
+                    <select name="runner{{ runner[1] }}">
+                        <option value="({{ runner[0] }}_{{ runner[1] }})">Stayed</option>
+                        <option value="({{ runner[0] }}_0)">Out</option>
+                        {% if runner[1] == 1 %}
+                            <option value="({{ runner[0] }}_2)">2nd</option>
+                        {% endif %}
+                        {% if runner[1] == 1 or runner[1] == 2 %}
+                            <option value="({{ runner[0] }}_3)">3rd</option>
+                        {% endif %}
+                        <option value="({{ runner[0] }}_4)">Scored</option>
+                    </select>
+                    <br>
+                {% endfor %}
+                <br>
+            {% endif %}
+            <input id="pitch-button" type="submit" value="Submit">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        </form>
+    </div>
+    <div class="fieldset-item"></div>
 </fieldset>
 <br>
 <fieldset class="game">

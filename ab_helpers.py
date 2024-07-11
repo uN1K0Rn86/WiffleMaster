@@ -40,6 +40,7 @@ def ball(result, runners, ab_id, game_id, three=False):
             result = "IBB"
         else:
             result = "BB"
+
         if len(runners) > 0:
             if runners[0][1] == 1:
                 runners[0][1] += 1

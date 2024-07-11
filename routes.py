@@ -370,6 +370,49 @@ def game_page(id):
                 ab_id = at_bats.last_ab_id(id)
             at_bats.handle_pitch(result, ab_id, id, runners)
 
+        elif "sl" in request.form:
+            result = "Strike (looking)"
+            if at_bats.current_ab_id(id) is None:
+                ab_id = at_bats.current_ab_id(id)
+            else:
+                ab_id = at_bats.last_ab_id(id)
+            at_bats.handle_pitch(result, ab_id, id, runners)
+
+        elif "ss" in request.form:
+            result = "Strike (swinging)"
+            if at_bats.current_ab_id(id) is None:
+                ab_id = at_bats.current_ab_id(id)
+            else:
+                ab_id = at_bats.last_ab_id(id)
+            at_bats.handle_pitch(result, ab_id, id, runners)
+
+        elif "Foul" in request.form:
+            result = "Foul"
+            if at_bats.current_ab_id(id) is None:
+                ab_id = at_bats.current_ab_id(id)
+            else:
+                ab_id = at_bats.last_ab_id(id)
+            at_bats.handle_pitch(result, ab_id, id, runners)
+
+        elif "Ball" in request.form:
+            result = "Ball"
+            runners = []
+            # Check if there are any runners and add them to the list of runners.
+            if "runner1" in request.form:
+                runner1 = games.parse_option(request.form["runner1"])
+                runners.append(runner1)
+            if "runner2" in request.form:
+                runner2 = games.parse_option(request.form["runner2"])
+                runners.append(runner2)
+            if "runner3" in request.form:
+                runner3 = games.parse_option(request.form["runner3"])
+                runners.append(runner3)
+            if at_bats.current_ab_id(id) is None:
+                ab_id = at_bats.current_ab_id(id)
+            else:
+                ab_id = at_bats.last_ab_id(id)
+            at_bats.handle_pitch(result, ab_id, id, runners)
+
         elif "end_inning" in request.form:
             games.end_inning(id)
         

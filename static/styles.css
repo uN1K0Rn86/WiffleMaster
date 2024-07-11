@@ -145,6 +145,33 @@ fieldset.text {
     margin-right: 10px;
 }
 
+.pitch-form {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+}
+
+.pitch-form form {
+    justify-content: center;
+}
+
+#pitch-select{
+    grid-column: span 2;
+}
+
+#pitch-button {
+    padding:5px;
+    border: none;
+    text-align: center;
+    width: 10em;
+    margin-right: 2em;
+    background: tan;
+}
+
+form #pitch-button:hover{
+    background: rgb(138, 119, 94);
+    color: white;
+}
+
 .field-item-two-column{
     grid-column: span 2;
 }
