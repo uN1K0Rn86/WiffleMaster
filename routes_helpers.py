@@ -33,6 +33,7 @@ def update_current_players(game_id, h_team, a_team):
     in_progress = games.in_progress(game_id)
     last = games.get_previous(game_id)
     current = {}
+    removed = games.get_removed(game_id)
 
     if inning % 2 == 1:
         if in_progress:
@@ -43,8 +44,22 @@ def update_current_players(game_id, h_team, a_team):
                     games.set_previous(game_id, last+1)
 
         previous = games.get_previous(game_id)
-        current["batter"] = games.batter_up(a_team["order"], previous) # The current batter.
-        current["on_deck"] = games.batter_up(a_team["order"], previous+1) # The next batter.
+
+        current["batter"] = games.batter_up(a_team["order"], previous, game_id) # The current batter.
+        if removed:
+            if current["batter"][0] in removed:
+                while current["batter"][0] in removed:
+                    previous += 1
+                    current["batter"] = games.batter_up(a_team["order"], previous, game_id)
+                    games.set_previous(game_id, previous)
+
+        current["on_deck"] = games.batter_up(a_team["order"], previous+1, game_id) # The next batter.
+        if removed:
+            if current["on_deck"][0] in removed:
+                while current["on_deck"][0] in removed:
+                    previous += 1
+                    current["on_deck"] = games.batter_up(a_team["order"], previous+1, game_id)
+
         current["pitcher"] = h_team["pitcher"] # The current pitcher.
         current["p_players"] = teams.list_players(h_team["id"][0]) # List of players available for a pitching change.
         current["batting_team"] = a_team["id"][0]
@@ -59,8 +74,22 @@ def update_current_players(game_id, h_team, a_team):
                     games.set_previous(game_id, last+1)
 
         previous = games.get_previous(game_id)
-        current["batter"] = games.batter_up(h_team["order"], previous) # The current batter.
-        current["on_deck"] = games.batter_up(h_team["order"], previous+1) # The next batter.
+
+        current["batter"] = games.batter_up(h_team["order"], previous, game_id) # The current batter.
+        if removed:
+            if current["batter"][0] in removed:
+                while current["batter"][0] in removed:
+                    previous += 1
+                    current["batter"] = games.batter_up(h_team["order"], previous, game_id)
+                    games.set_previous(game_id, previous)
+
+        current["on_deck"] = games.batter_up(h_team["order"], previous+1, game_id) # The next batter.
+        if removed:
+            if current["on_deck"][0] in removed:
+                while current["on_deck"][0] in removed:
+                    previous += 1
+                    current["on_deck"] = games.batter_up(a_team["order"], previous+1, game_id)
+
         current["pitcher"] = a_team["pitcher"]# The current pitcher.
         current["p_players"] = teams.list_players(a_team["id"][0]) # List of players available for a pitching change.
         current["batting_team"] = h_team["id"][0]

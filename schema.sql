@@ -46,7 +46,8 @@ CREATE TABLE games (id SERIAL PRIMARY KEY,
                     a_pitcher INTEGER REFERENCES players,
                     h_previous INTEGER DEFAULT -2,
                     a_previous INTEGER DEFAULT -2,
-                    max_runs INTEGER DEFAULT 5);
+                    max_runs INTEGER DEFAULT 5,
+                    removed INTEGER[]);
 
 CREATE TABLE at_bats (id SERIAL PRIMARY KEY,
                       batter_id INTEGER REFERENCES players,

@@ -88,6 +88,27 @@ def set_order(game_id, h_order, a_order, h_pitcher, a_pitcher):
         return False
     return True
 
+def remove_player(game_id, player_id):
+    """Remove a player from the game."""
+    try:
+        sql = text("""UPDATE games
+                        SET removed = removed || :player_id
+                        WHERE id = :game_id
+                   """)
+        db.session.execute(sql, {"game_id":game_id, "player_id":player_id})
+        db.session.commit()
+    except:
+        return False
+    return True
+
+def get_removed(game_id):
+    """Return the list of removed players."""
+    sql = text("""SELECT removed
+                    FROM games
+                    WHERE id = :game_id
+               """)
+    return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
+
 def get_h_order(id):
     """Return the batting order for the home team."""
     sql = text("""SELECT h_order
@@ -285,12 +306,13 @@ def hits_away(game_id):
                """)
     return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
     
-def batter_up(order, previous):
+def batter_up(order, previous, game_id):
     """Return the id and name of the current batter."""
     if previous + 1 < len(order):
-        return order[previous + 1]
+        batter = order[previous + 1]
     else:
-        return order[0]
+        batter = order[0]
+    return batter
     
 def get_previous(game_id):
     """Return the index of the previous batter for the home team.
@@ -335,7 +357,7 @@ def batting_stats(game_id, player_id):
                 COALESCE(SUM(CASE WHEN A.game_id=:game_id AND result NOT IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS abs,
                 COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS hits,
                 COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END), 0) AS hr,
-                SUM(A.rbi) AS rbi
+                CASE WHEN SUM(A.rbi) > 0 THEN SUM(A.rbi) ELSE 0 END AS rbi
                 FROM players P LEFT JOIN at_bats A
                 ON A.batter_id=P.id AND A.game_id=:game_id AND result IS NOT NULL
                 WHERE P.id=:player_id
