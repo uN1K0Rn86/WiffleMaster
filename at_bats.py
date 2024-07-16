@@ -5,7 +5,8 @@ import ab_helpers
 
 def pitch_results():
     """Return a list of possible results for any pitch."""
-    return ["Intentional Walk", "Single", "Double", "Triple", "Home Run", "Groundout", "Flyout", "Lineout", "Fielder's choice", "Sac fly", "Sac bunt"]
+    return ["Intentional Walk", "Single", "Double", "Triple", "Home Run", "Groundout", "Flyout", "Lineout", "Fielder's choice", "Sac fly", "Sac bunt",
+            "Single (out)", "Double (out)", "Triple (out)"]
 
 def create_at_bat(game_id, batter_id, pitcher_id, b_team_id, p_team_id):
     """Create a new at bat."""
@@ -91,6 +92,7 @@ def handle_pitch(result, ab_id, game_id, runners: list):
        to finish the game if the home team obtains a lead in the final inning."""
     outs = 0
     runs = 0
+    base_hits = ["Single", "Double", "Triple", "Home Run", "Single (out)", "Double (out)", "Triple (out)"]
     
     try:
         if result == "Strike (looking)":
@@ -119,8 +121,8 @@ def handle_pitch(result, ab_id, game_id, runners: list):
             else:
                 sql, result, prev_runs = ab_helpers.ball(result, runners, ab_id, game_id, False)
 
-        elif result == "Single" or result == "Double" or result == "Triple" or result == "Home Run":
-            sql, runners, prev_runs, runs = ab_helpers.base_hit(result, ab_id, game_id, runners)
+        elif result in base_hits:
+            sql, runners, prev_runs, runs, outs = ab_helpers.base_hit(result, ab_id, game_id, runners, outs)
 
         elif result == "Fielder's choice":
             sql, prev_runs = ab_helpers.fielders_choice(ab_id, game_id, runners)
@@ -131,7 +133,6 @@ def handle_pitch(result, ab_id, game_id, runners: list):
         else:
             sql, outs, prev_runs = ab_helpers.out(game_id, runners, outs)
         
-
         for runner in runners:
             if runner[1] == 0:
                 outs += 1

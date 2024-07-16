@@ -49,7 +49,8 @@ def batting_stats(player_id):
                     P.name AS name,
                     COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) AS pa,
                     COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS walks,
-                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS hits,
+                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+                        THEN 1 ELSE 0 END), 0) AS hits,
                     COALESCE(SUM(CASE WHEN A.result IN ('Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS xbh,
                     COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END), 0) AS hr,
                     COALESCE(SUM(CASE WHEN A.result = 'Triple' THEN 1 ELSE 0 END), 0) AS triples,

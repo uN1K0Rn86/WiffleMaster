@@ -65,9 +65,10 @@ def ball(result, runners, ab_id, game_id, three=False):
         
     return sql, result, prev_runs
 
-def base_hit(result, ab_id, game_id, runners):
+def base_hit(result, ab_id, game_id, runners, outs):
     """Handle the result for a base hit"""
     runs = 0
+    outs = 0
     if result == "Home Run":
         runs = 1
         for runner in runners:
@@ -79,6 +80,10 @@ def base_hit(result, ab_id, game_id, runners):
         base = 2
     elif result == "Single":
         base = 1
+    
+    if "out" in result:
+        base = 0
+        outs += 1
 
     prev_runs = games.runs_inning(game_id, games.current_inning(game_id))
     games.add_runner(ab_id, game_id, base)
@@ -89,7 +94,7 @@ def base_hit(result, ab_id, game_id, runners):
                 WHERE id=:ab_id
                 """)
     
-    return sql, runners, prev_runs, runs
+    return sql, runners, prev_runs, runs, outs
 
 def fielders_choice(ab_id, game_id, runners):
     """Handle the result for fielder's choice."""
