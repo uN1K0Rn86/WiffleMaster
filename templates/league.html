@@ -52,7 +52,11 @@
     <label for="sort">Sort by: </label>
     <select name="sort">
         {% for value in batting_values %}
-            <option value="{{ value }}" {% if sort == value %} selected {% endif %}>{{ value | upper }}</option>
+            {% if value == "ops_plus" %}
+                <option value="{{ value }}" {% if sort == value %} selected {% endif %}>{{ "OPS+" }}</option>
+            {% else %}
+                <option value="{{ value }}" {% if sort == value %} selected {% endif %}>{{ value | upper }}</option>
+            {% endif %}
         {% endfor %}
     </select>
     <select name="order">
@@ -89,6 +93,7 @@
         <td><b>OBP</b></td>
         <td><b>SLG</b></td>
         <td><b>OPS</b></td>
+        <td><b>OPS+</b></td>
     </tr>
     {% for player in batting_leaders %}
         <tr>
@@ -105,6 +110,7 @@
             <td>{{ '%.3f' % player.obp }}</td>
             <td>{{ '%.3f' % player.slg }}</td>
             <td>{{ '%.3f' % player.ops }}</td>
+            <td>{{ '%.0f' % player.ops_plus }}</td>
         </tr>
     {% endfor %}
 </table>

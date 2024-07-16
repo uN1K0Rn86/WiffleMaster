@@ -114,10 +114,56 @@ def batting_average(league_id, player_id):
                """)
     return db.session.execute(sql, {"player_id":player_id, "league_id":league_id}).fetchone()[0]
 
+def league_obp(league_id):
+    """Return the on base percentage for the entire league."""
+    sql = text("""SELECT
+                    (COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+                            THEN 1 ELSE 0 END), 0) :: FLOAT +
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
+                        COALESCE(NULLIF(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0), 1) AS obp
+                    FROM at_bats A
+                        JOIN games G
+                        ON A.game_id = G.id
+                        AND G.league_id = :league_id
+               """)
+    return db.session.execute(sql, {"league_id":league_id}).fetchone()[0]
+
+def league_slg(league_id):
+    """Return the slugging percentage for the entire league."""
+    sql = text("""SELECT
+                    ((COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) +
+                        2 * COALESCE(SUM(CASE WHEN A.result = 'Double' THEN 1 ELSE 0 END), 0) +
+                        3 * COALESCE(SUM(CASE WHEN A.result = 'Triple' THEN 1 ELSE 0 END), 0) +
+                        4 * COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END))) :: FLOAT /
+                        (COALESCE(NULLIF(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0), 1) -
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0))) AS slg
+                    FROM at_bats A
+                        JOIN games G
+                        ON A.game_id = G.id
+                        AND G.league_id = :league_id
+               """)
+    return db.session.execute(sql, {"league_id":league_id}).fetchone()[0]
+
 def batting_leaders(league_id, amount, offset, sort, asc=False):
     """Return batting statistics for players in this league."""
     direction = "ASC" if asc else "DESC"
     order_by = f"ORDER BY {sort} {direction}"
+    l_obp = league_obp(league_id)
+    l_slg = league_slg(league_id)
+    print(l_obp)
+    print(l_slg)
+    obp = """(COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+                            THEN 1 ELSE 0 END), 0) :: FLOAT +
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
+                        COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0)"""
+    slg = """((COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) +
+                        2 * COALESCE(SUM(CASE WHEN A.result = 'Double' THEN 1 ELSE 0 END), 0) +
+                        3 * COALESCE(SUM(CASE WHEN A.result = 'Triple' THEN 1 ELSE 0 END), 0) +
+                        4 * COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END))) :: FLOAT /
+                        (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
+                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)))"""
     sql = text(f"""SELECT
                     P.id AS id,
                     P.name AS name,
@@ -140,17 +186,8 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
                         (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
                         COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
                         COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)), 0) AS avg,
-                    (COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
-                            THEN 1 ELSE 0 END), 0) :: FLOAT +
-                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
-                        COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) AS obp,
-                    ((COALESCE(SUM(CASE WHEN A.result = 'Single' THEN 1 ELSE 0 END), 0) +
-                        2 * COALESCE(SUM(CASE WHEN A.result = 'Double' THEN 1 ELSE 0 END), 0) +
-                        3 * COALESCE(SUM(CASE WHEN A.result = 'Triple' THEN 1 ELSE 0 END), 0) +
-                        4 * COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END))) :: FLOAT /
-                        (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
-                        COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
-                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0))) AS slg,
+                    {obp} AS obp,
+                    {slg} AS slg,
                     SUM(rbi) AS rbi,
                     ((COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
                             THEN 1 ELSE 0 END), 0) :: FLOAT +
@@ -162,7 +199,8 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
                         4 * COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END))) :: FLOAT /
                         (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
                         COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
-                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)))) AS ops
+                        COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)))) AS ops,
+                    100 * (({obp} / {l_obp}) + ({slg} / {l_slg}) - 1) AS ops_plus
                 FROM players P
                 LEFT JOIN at_bats A ON A.batter_id = P.id
                 JOIN games G ON A.game_id = G.id

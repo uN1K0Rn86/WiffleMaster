@@ -37,7 +37,7 @@ def list_teamless():
     return db.session.execute(sql).fetchall()
 
 def batting_values():
-    return ["name", "g", "pa", "ab", "hits", "xbh", "hr", "rbi", "avg", "obp", "slg", "ops"]
+    return ["name", "g", "pa", "ab", "hits", "xbh", "hr", "rbi", "avg", "obp", "slg", "ops", "ops_plus"]
 
 def pitching_values():
     return ["name", "g", "IP", "k", "k9", "bb", "bb9", "baa", "r", "era"]
