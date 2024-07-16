@@ -151,8 +151,6 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
     order_by = f"ORDER BY {sort} {direction}"
     l_obp = league_obp(league_id)
     l_slg = league_slg(league_id)
-    print(l_obp)
-    print(l_slg)
     obp = """(COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
                             THEN 1 ELSE 0 END), 0) :: FLOAT +
                         COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
