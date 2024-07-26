@@ -99,7 +99,8 @@ def batting_average(league_id, player_id):
                                 COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
                                 COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0)) = 0 
                             THEN 0
-                            ELSE SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+                            ELSE SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)',
+                                    'Single +o', 'Double +o', 'Triple +o')
                                     THEN 1 ELSE 0 END) :: FLOAT /
                                 (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
                                 COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
@@ -117,7 +118,8 @@ def batting_average(league_id, player_id):
 def league_obp(league_id):
     """Return the on base percentage for the entire league."""
     sql = text("""SELECT
-                    (COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+                    (COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)',
+                            'Single +o', 'Double +o', 'Triple +o')
                             THEN 1 ELSE 0 END), 0) :: FLOAT +
                         COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
                         COALESCE(NULLIF(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0), 1) AS obp
@@ -151,7 +153,8 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
     order_by = f"ORDER BY {sort} {direction}"
     l_obp = league_obp(league_id)
     l_slg = league_slg(league_id)
-    obp = """(COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+    obp = """(COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)',
+                            'Single +o', 'Double +o', 'Triple +o')
                             THEN 1 ELSE 0 END), 0) :: FLOAT +
                         COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
                         COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0)"""
@@ -168,7 +171,8 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
                     COUNT(DISTINCT A.game_id) AS g,
                     COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) AS pa,
                     COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS walks,
-                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)',
+                            'Single +o', 'Double +o', 'Triple +o')
                         THEN 1 ELSE 0 END), 0) AS hits,
                     COALESCE(SUM(CASE WHEN A.result IN ('Double', 'Triple', 'Home Run') THEN 1 ELSE 0 END), 0) AS xbh,
                     COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END), 0) AS hr,
@@ -179,7 +183,8 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
                     COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
                         COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
                         COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0) AS ab,
-                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+                    COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)',
+                                'Single +o', 'Double +o', 'Triple +o')
                             THEN 1 ELSE 0 END) :: FLOAT /
                         (COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0) -
                         COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) - 
@@ -187,7 +192,8 @@ def batting_leaders(league_id, amount, offset, sort, asc=False):
                     {obp} AS obp,
                     {slg} AS slg,
                     SUM(rbi) AS rbi,
-                    ((COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+                    ((COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)',
+                                    'Single +o', 'Double +o', 'Triple +o')
                             THEN 1 ELSE 0 END), 0) :: FLOAT +
                         COALESCE(SUM(CASE WHEN A.result IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0)) / 
                         COALESCE(SUM(CASE WHEN A.result IS NOT NULL THEN 1 ELSE 0 END), 0)) +
@@ -220,8 +226,17 @@ def pitching_leaders(league_id, amount, offset, sort, asc=False):
               COALESCE(SUM(CASE WHEN A.result IN ('Sac fly', 'Sac bunt') THEN 1 ELSE 0 END), 0))"""
     k = "COALESCE(SUM(CASE WHEN A.result IN ('Strikeout', 'Strikeout (s)') THEN 1 ELSE 0 END), 0)"
     bb = "COALESCE(SUM(CASE WHEN A.result in ('BB', 'IBB') THEN 1 ELSE 0 END), 0)"
-    hits = "COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)') THEN 1 ELSE 0 END), 0)"
+    hits = """COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)',
+            'Single +o', 'Double +o', 'Triple +o') THEN 1 ELSE 0 END), 0)"""
     r = "COALESCE(SUM(rbi), 0)"
+    er = """(SELECT COUNT (*)
+                FROM runners R
+                JOIN games G
+                    ON G.id = R.game_id
+                JOIN leagues L
+                    ON G.league_id = L.id
+                WHERE R.status = 4
+                AND R.pitcher_id = P.id)"""
     sql = text(f"""SELECT
                     P.id AS id,
                     P.name AS name,
@@ -234,7 +249,12 @@ def pitching_leaders(league_id, amount, offset, sort, asc=False):
                     {hits} AS hits,
                     CASE WHEN {outs} = 0 THEN 0 ELSE ({hits}) ::FLOAT / (({hits}) + ({outs}) ::FLOAT) END AS baa,
                     {r} AS r,
-                    CASE WHEN {outs} = 0 THEN 0 ELSE ({r}) ::FLOAT / (({outs}) ::FLOAT / 27) END AS era
+                    {er} AS er,
+                    CASE 
+                            WHEN {outs} = 0 AND {er} = 0 THEN 0 
+                            WHEN {outs} = 0 AND {er} != 0 THEN 'Infinity'
+                            ELSE ({er}::FLOAT / ({outs}::FLOAT / 27))
+                        END AS era
                 FROM players P
                 LEFT JOIN at_bats A ON A.pitcher_id = P.id
                 JOIN games G ON A.game_id = G.id

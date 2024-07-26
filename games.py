@@ -289,7 +289,7 @@ def hits_home(game_id):
                JOIN GAMES G
                ON A.game_id=G.id
                AND A.b_team_id=G.h_team_id
-               AND A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+               AND A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)', 'Single +o', 'Double +o', 'Triple +o')
                AND A.game_id=:game_id
                """)
     return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
@@ -301,7 +301,7 @@ def hits_away(game_id):
                JOIN GAMES G
                ON A.game_id=G.id
                AND A.b_team_id=G.a_team_id
-               AND A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)')
+               AND A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)', 'Triple (out)', 'Single +o', 'Double +o', 'Triple +o')
                AND A.game_id=:game_id
                """)
     return db.session.execute(sql, {"game_id":game_id}).fetchone()[0]
@@ -356,7 +356,7 @@ def batting_stats(game_id, player_id):
                 P.name AS name,
                 COALESCE(SUM(CASE WHEN A.game_id=:game_id AND result NOT IN ('BB', 'IBB') THEN 1 ELSE 0 END), 0) AS abs,
                 COALESCE(SUM(CASE WHEN A.result IN ('Single', 'Double', 'Triple', 'Home Run', 'Single (out)', 'Double (out)',
-                'Triple (out)') THEN 1 ELSE 0 END), 0) AS hits,
+                'Triple (out)', 'Single +o', 'Double +o', 'Triple +o') THEN 1 ELSE 0 END), 0) AS hits,
                 COALESCE(SUM(CASE WHEN A.result = 'Home Run' THEN 1 ELSE 0 END), 0) AS hr,
                 CASE WHEN SUM(A.rbi) > 0 THEN SUM(A.rbi) ELSE 0 END AS rbi
                 FROM players P LEFT JOIN at_bats A
