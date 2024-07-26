@@ -88,6 +88,37 @@ def set_order(game_id, h_order, a_order, h_pitcher, a_pitcher):
         return False
     return True
 
+def add_player(game_id, player_id, spot, team):
+    """Add a player into the batting order in a specific spot."""
+    spot = int(spot)
+    print(spot, type(spot))
+    if team == "home":
+        order = get_h_order(game_id)
+        team = "h_order"
+    else:
+        order = get_a_order(game_id)
+        team = "a_order"
+    
+    # Prepare the SQL query based on the spot
+    if spot == 1:  # Insert at the beginning
+        order = [player_id] + order
+        
+    elif spot == -1:  # Insert at the end (use -1 to indicate end)
+        order.append(player_id)
+
+    else:  # Insert at a specific spot
+        order.insert(spot - 1, int(player_id))
+
+    sql = text(f"""
+            UPDATE games
+            SET {team} = ARRAY{order}
+            WHERE id = :game_id
+        """)
+
+    # Execute the SQL query
+    db.session.execute(sql, {"game_id": game_id})
+    db.session.commit()
+
 def remove_player(game_id, player_id):
     """Remove a player from the game."""
     try:
@@ -122,6 +153,37 @@ def get_a_order(id):
                FROM games
                WHERE id=:id""")
     return db.session.execute(sql, {"id":id}).fetchone()[0]
+
+def not_playing(game_id):
+    """Return lists of players that are not playing for each team."""
+    h_order = get_h_order(game_id)
+    a_order = get_a_order(game_id)
+    h = home_team(game_id)
+    a = away_team(game_id)
+
+    # Convert the lists to strings with parentheses
+    a_order_str = f"({', '.join(map(str, a_order))})"
+    h_order_str = f"({', '.join(map(str, h_order))})"
+
+    sql = text(f"""SELECT P.id, P.name
+                    FROM players P 
+                    LEFT JOIN team_players TP ON P.id = TP.player_id 
+                    JOIN teams T ON T.id = TP.team_id
+                    AND T.id = {a[0]}
+                    WHERE P.id NOT IN {a_order_str}
+               """)
+    away = db.session.execute(sql).fetchall()
+
+    sql2 = text(f"""SELECT P.id, P.name
+                    FROM players P 
+                    LEFT JOIN team_players TP ON P.id = TP.player_id 
+                    JOIN teams T ON T.id = TP.team_id
+                    AND T.id = {h[0]}
+                    WHERE P.id NOT IN {h_order_str}
+               """)
+    home = db.session.execute(sql2).fetchall()
+
+    return away, home
 
 def validate_order(h_order, a_order):
     """Validate the batting order."""

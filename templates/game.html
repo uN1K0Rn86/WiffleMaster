@@ -171,6 +171,7 @@
 </fieldset>
 {% endif %}
 
+<br>
 <div class="boxscore-container">
     <fieldset class="boxscore">
         <legend><b>Away</b></legend>
@@ -192,10 +193,34 @@
                     <td>{{ player[0][2] }}</td>
                     <td>{{ player[0][3] }}</td>
                     <td>{{ player[0][4] }}</td>
-                    <td>{{ '%.3f' % player[1] }}</td>
+                    <td>{% if league_id %}{{ '%.3f' % player[1] }}{% endif %}</td>
                 </tr>
             {% endfor %}
         </table>
+        {% if in_progress %}
+            <br>
+            <form action="/games/{{ id }}" method="POST">
+                <label for="add_a_player">Add player: </label>
+                <select name="add_a_player">
+                    {% for player in not_playing_a %}
+                        <option value="{{ player.id }}">{{ player.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="add_a_spot">Spot: </label>
+                <select name="add_a_spot">
+                    {% for i in range(1, box_away|length + 2) %}
+                        {% if i == box_away|length + 1 %}
+                            <option value="-1">{{ box_away|length + 1 }}</option>
+                        {% else %}
+                            <option value="{{ i }}">{{ i }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <br><br>
+                <input id="login-button" type="submit" value="Add">
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            </form>
+        {% endif %}
     </fieldset>
     <fieldset class="boxscore">
         <legend><b>Home</b></legend>
@@ -217,14 +242,39 @@
                     <td>{{ player[0][2] }}</td>
                     <td>{{ player[0][3] }}</td>
                     <td>{{ player[0][4] }}</td>
-                    <td>{{ '%.3f' % player[1] }}</td>
+                    <td>{% if league_id %}{{ '%.3f' % player[1] }}{% endif %}</td>
                 </tr>
             {% endfor %}
         </table>
+        {% if in_progress %}
+            <br>
+            <form action="/games/{{ id }}" method="POST">
+                <label for="add_h_player">Add player: </label>
+                <select name="add_h_player">
+                    {% for player in not_playing_h %}
+                        <option value="{{ player.id }}">{{ player.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="add_h_spot">Spot: </label>
+                <select name="add_h_spot">
+                    {% for i in range(1, box_home|length + 2) %}
+                        {% if i == box_home|length + 1 %}
+                            <option value="-1">{{ box_home|length + 1 }}</option>
+                        {% else %}
+                            <option value="{{ i }}">{{ i }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <br><br>
+                <input id="login-button" type="submit" value="Add">
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            </form>
+        {% endif %}
     </fieldset>
 </div>
 
 {% if in_progress %}
+<br>
 <fieldset class="text">
     <form action="/games/{{ id }}" method="POST">
         <label for="remove">Remove player: </label>

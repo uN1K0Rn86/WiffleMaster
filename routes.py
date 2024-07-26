@@ -323,6 +323,7 @@ def game_page(id):
     hits_home = games.hits_home(id)
     hits_away = games.hits_away(id)
     box_away, box_home = games.box_scores(id)
+    league_id = games.get_league_id(id)
 
     pitch_results = at_bats.pitch_results()
     runners = games.get_runners(id)
@@ -337,7 +338,8 @@ def game_page(id):
                                on_deck_stats=current["on_deck_stats"], pitch_results=pitch_results,
                                runners=runners, outs=outs, count=current["count"], pitch_count=current["pitch_count"],
                                in_progress=in_progress, hits_home=hits_home, hits_away=hits_away, box_away=box_away,
-                               box_home=box_home, all_players=current["all_players"])
+                               box_home=box_home, all_players=current["all_players"], league_id=league_id,
+                               not_playing_a=current["not_playing_a"], not_playing_h=current["not_playing_h"])
     
     if request.method == "POST":
         # This handles the form if the pitcher is changed.
@@ -419,6 +421,16 @@ def game_page(id):
         elif "remove" in request.form:
             remove_id = request.form["remove"]
             games.remove_player(id, remove_id)
+
+        elif "add_h_player" in request.form:
+            add_id = request.form["add_h_player"]
+            add_spot = request.form["add_h_spot"]
+            games.add_player(id, add_id, add_spot, "home")
+
+        elif "add_a_player" in request.form:
+            add_id = request.form["add_a_player"]
+            add_spot = request.form["add_a_spot"]
+            games.add_player(id, add_id, add_spot, "away")
         
         return redirect(url_for("game_page", id=id))
 

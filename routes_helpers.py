@@ -35,6 +35,7 @@ def update_current_players(game_id, h_team, a_team):
     current = {}
     removed = games.get_removed(game_id)
     current["all_players"] = a_team["order"] + h_team["order"]
+    current["not_playing_a"], current["not_playing_h"] = games.not_playing(game_id)
 
     if inning % 2 == 1:
         if in_progress:

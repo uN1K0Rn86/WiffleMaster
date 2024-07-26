@@ -136,8 +136,8 @@ fieldset.text {
 }
 
 .boxscore {
+    background-color: blanchedalmond;
     flex: 1;
-    border: none;
 }
 
 .fieldset-item {
