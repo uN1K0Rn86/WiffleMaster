@@ -434,6 +434,7 @@ def add_out(game_id):
         else:
             sql = text("""UPDATE games
                        SET outs = outs + 1
+                       WHERE id=:game_id
                        """)
         db.session.execute(sql, {"game_id":game_id})
         db.session.commit()
