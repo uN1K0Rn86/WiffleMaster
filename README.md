@@ -1,4 +1,7 @@
 # WiffleMaster
+
+Application deployed at https://wifflemaster.fly.dev/
+
 A webapp for keeping score, analyzing statistics, and managing players, teams, and leagues in wiffleball.
 
 The goal of this project is to create an application where users can create and manage their own leagues, teams, and players. The app will be created using python and the flask webapp library, and the database will be managed using postgreSQL.
